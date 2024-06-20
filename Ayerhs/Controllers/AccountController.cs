@@ -25,8 +25,15 @@ namespace Ayerhs.Controllers
         {
             try
             {
-                await _accountService.RegisterClientAsync(inRegisterClientDto);
-                return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: "Client registered successfully", txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                if (ModelState.IsValid)
+                {
+                    await _accountService.RegisterClientAsync(inRegisterClientDto);
+                    return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: "Client registered successfully", txn: ConstantData.GenerateTransactionId(), returnValue: null)); 
+                }
+                else
+                {
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                }
             }
             catch (Exception ex)
             {

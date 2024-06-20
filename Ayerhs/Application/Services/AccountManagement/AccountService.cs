@@ -1,5 +1,6 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Konscious.Security.Cryptography;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -34,8 +35,16 @@ namespace Ayerhs.Application.Services.AccountManagement
         /// <returns>A base64 encoded string representing the hashed password.</returns>
         private static string HashPassword(string password, string salt)
         {
-            var saltedPassword = password + salt;
-            return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(saltedPassword)));
+            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
+            {
+                Salt = Convert.FromBase64String(salt),
+                DegreeOfParallelism = 8,
+                MemorySize = 65536,
+                Iterations = 4
+            };
+
+            var hash = argon2.GetBytes(16);
+            return Convert.ToBase64String(hash);
         }
 
         /// <summary>

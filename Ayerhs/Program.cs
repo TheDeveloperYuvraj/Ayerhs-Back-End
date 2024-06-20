@@ -1,3 +1,6 @@
+using Ayerhs.Application.Repositories.AccountManagement;
+using Ayerhs.Application.Services.AccountManagement;
+using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +14,11 @@ builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+#region Dependency Injection Container
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+#endregion
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
