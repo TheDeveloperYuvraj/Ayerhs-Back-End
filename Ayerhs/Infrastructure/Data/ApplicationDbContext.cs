@@ -3,12 +3,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ayerhs.Infrastructure.Data
 {
+    /// <summary>
+    /// This class represents the application database context derived from DbContext.
+    /// </summary>
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
+        /// <summary>
+        /// DbSet for the Clients entity.
+        /// </summary>
         public DbSet<Clients> Clients { get; set; }
+
+        /// <summary>
+        /// DbSet for the Roles entity.
+        /// </summary>
         public DbSet<Roles> Roles { get; set; }
+
+        /// <summary>
+        /// DbSet for the ClientRoles entity.
+        /// </summary>
         public DbSet<ClientRoles> ClientRoles { get; set; }
 
+        /// <summary>
+        /// Configures entity mappings and relationships for the database model.
+        /// </summary>
+        /// <param name="modelBuilder">The model builder instance for configuration.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
