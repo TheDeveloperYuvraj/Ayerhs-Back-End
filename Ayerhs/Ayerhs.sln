@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ayerhs", "Ayerhs.csproj", "{ECA9D933-43F5-4889-8A8E-5C6C72223F66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ayerhs", "Ayerhs.csproj", "{ECA9D933-43F5-4889-8A8E-5C6C72223F66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AyerhsTests", "..\AyerhsTests\AyerhsTests.csproj", "{93312112-473E-4F48-BC6F-837767CEC53E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{ECA9D933-43F5-4889-8A8E-5C6C72223F66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECA9D933-43F5-4889-8A8E-5C6C72223F66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECA9D933-43F5-4889-8A8E-5C6C72223F66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93312112-473E-4F48-BC6F-837767CEC53E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93312112-473E-4F48-BC6F-837767CEC53E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93312112-473E-4F48-BC6F-837767CEC53E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93312112-473E-4F48-BC6F-837767CEC53E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
