@@ -27,6 +27,10 @@
         /// </summary>
         public const string NotFoundError = "ERR-1000-004";
 
+        /// <summary>
+        /// Error code for Invalid Credentials
+        /// </summary>
+        public const string InvalidCredentials = "ERR-1000-005";
 
 
         /// <summary>

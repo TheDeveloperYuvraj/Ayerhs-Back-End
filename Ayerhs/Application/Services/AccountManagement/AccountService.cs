@@ -10,8 +10,9 @@ namespace Ayerhs.Application.Services.AccountManagement
     /// This class implements the IAccountService interface and provides concrete methods
     /// for account management services.
     /// </summary>
-    public class AccountService(IAccountRepository accountRepository) : IAccountService
+    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository) : IAccountService
     {
+        private readonly ILogger<AccountService> _logger = logger;
         private readonly IAccountRepository _accountRepository = accountRepository;
 
         #region Private Methods for Support
@@ -110,6 +111,30 @@ namespace Ayerhs.Application.Services.AccountManagement
                     RoleId = inRegisterClientDto.RoleId
                 };
                 await _accountRepository.AddClientRolesAsync(clientRole);
+            }
+        }
+
+        public async Task<Clients?> LoginClientAsync(InLoginClientDto inLoginClientDto)
+        {
+            var client = await _accountRepository.GetClientByEmailAsync(inLoginClientDto.ClientEmail!);
+            if (client != null)
+            {
+                var hashedLoginPassword = HashPassword(inLoginClientDto.ClientPassword!, client.Salt!);
+                if (hashedLoginPassword == client.ClientPassword)
+                {
+                    _logger.LogInformation("Login Successful");
+                    return client;
+                }
+                else
+                {
+                    _logger.LogError("Invalid Credentials");
+                    return null;
+                }
+            }
+            else
+            {
+                _logger.LogError("Invalid Email address provided.");
+                return null;
             }
         }
     }

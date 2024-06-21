@@ -2,6 +2,7 @@
 using Ayerhs.Core.Entities.AccountManagement;
 using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Ayerhs.Infrastructure.External;
 using Bogus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,12 +16,14 @@ namespace AyerhsTests.AccountManagement
         private readonly Mock<IAccountService> _mockAccountService;
         private readonly AccountController _controller;
         private readonly Faker<InRegisterClientDto> _faker;
+        private readonly Mock<JwtTokenGenerator> _mockJwtTokenGenerator;
 
         public AccountControllerTests()
         {
             _mockLogger = new Mock<ILogger<AccountController>>();
             _mockAccountService = new Mock<IAccountService>();
-            _controller = new AccountController(_mockLogger.Object, _mockAccountService.Object);
+            _mockJwtTokenGenerator = new Mock<JwtTokenGenerator>();
+            _controller = new AccountController(_mockLogger.Object, _mockJwtTokenGenerator.Object, _mockAccountService.Object);
 
             _faker = new Faker<InRegisterClientDto>()
                 .RuleFor(r => r.ClientName, f => f.Name.FullName())

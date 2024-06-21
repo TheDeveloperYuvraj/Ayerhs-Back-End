@@ -13,5 +13,7 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="inRegisterClientDto">A DTO containing data for client registration.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
         Task RegisterClientAsync(InRegisterClientDto inRegisterClientDto);
+
+        Task<Clients?> LoginClientAsync(InLoginClientDto inLoginClientDto);
     }
 }
