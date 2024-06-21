@@ -27,5 +27,19 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="username">The username of the Client to retrieve.</param>
         /// <returns>A Task that returns the Client entity with the matching username, or null if not found.</returns>
         Task<Clients?> GetClientByUsernameAsync(string username);
+
+        /// <summary>
+        /// Asynchronously retrieve a role by ID.
+        /// </summary>
+        /// <param name="roleId">The ID of role.</param>
+        /// <returns>A task that returns the </returns>
+        Task<string?> GetRoleByName(int roleId);
+
+        /// <summary>
+        /// Asynchronously adds a new Client Role entity to the repository.
+        /// </summary>
+        /// <param name="clientRoles">The entity which decide about the role.</param>
+        /// <returns>A Task that returns assigned Client Role</returns>
+        Task <ClientRoles?> AddClientRolesAsync(ClientRoles? clientRoles);
     }
 }

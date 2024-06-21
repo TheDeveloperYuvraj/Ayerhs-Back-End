@@ -100,6 +100,26 @@ namespace Ayerhs.Core.Entities.AccountManagement
         public string? Salt { get; set; }
 
         /// <summary>
+        /// Locked condition of Client Account
+        /// </summary>
+        public bool? IsLocked { get; set; }
+
+        /// <summary>
+        /// Login Attempt Counts
+        /// </summary>
+        public int AttemptCount { get; set; }
+
+        /// <summary>
+        /// Last Login Date and Time
+        /// </summary>
+        public DateTime? LastLoginDateTime { get; set; }
+
+        /// <summary>
+        /// Locked Until Date Time
+        /// </summary>
+        public DateTime? LockedUntil { get; set; }
+
+        /// <summary>
         /// Collection of client roles associated with the Client.
         /// </summary>
         public ICollection<ClientRoles>? ClientRoles { get; set; }

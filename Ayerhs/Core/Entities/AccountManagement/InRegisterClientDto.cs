@@ -41,5 +41,11 @@ namespace Ayerhs.Core.Entities.AccountManagement
         [Required]
         [Phone]
         public string? ClientMobileNumber { get; set; }
+
+        /// <summary>
+        /// Role ID for the Client. (Required)
+        /// </summary>
+        [Required]
+        public int RoleId { get; set; }
     }
 }

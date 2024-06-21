@@ -44,5 +44,35 @@ namespace Ayerhs.Application.Repositories.AccountManagement
         {
             return await _context.Clients.SingleOrDefaultAsync(c => c.ClientUsername == username);
         }
+
+        /// <summary>
+        ///  Asynchronously retrieves a Role Name by Role ID.
+        /// </summary>
+        /// <param name="roleId">The role ID.</param>
+        /// <returns>A task that returns a string of role name.</returns>
+        public async Task<string?> GetRoleByName(int roleId)
+        {
+            var role = await _context.Roles.FindAsync(roleId);
+            if (role != null)
+            {
+                return role.Name;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously adds a new Client Role entity to the database.
+        /// </summary>
+        /// <param name="clientRoles">An entity that decides Client Role.</param>
+        /// <returns>A Task that returns Client Roles entity.</returns>
+        public async Task<ClientRoles?> AddClientRolesAsync(ClientRoles? clientRoles)
+        {
+            await _context.ClientRoles.AddAsync(clientRoles!);
+            await _context.SaveChangesAsync();
+            return clientRoles;
+        }
     }
 }

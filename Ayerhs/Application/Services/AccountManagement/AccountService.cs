@@ -100,6 +100,17 @@ namespace Ayerhs.Application.Services.AccountManagement
             };
 
             await _accountRepository.AddClientAsync(client);
+
+            var role = await _accountRepository.GetRoleByName(inRegisterClientDto.RoleId);
+            if (role != null)
+            {
+                var clientRole = new ClientRoles
+                {
+                    ClientId = client.Id,
+                    RoleId = inRegisterClientDto.RoleId
+                };
+                await _accountRepository.AddClientRolesAsync(clientRole);
+            }
         }
     }
 }
