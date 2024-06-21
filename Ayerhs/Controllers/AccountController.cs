@@ -3,6 +3,7 @@ using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Infrastructure.External;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Ayerhs.Controllers
 {
@@ -16,6 +17,25 @@ namespace Ayerhs.Controllers
         private readonly ILogger<AccountController> _logger = logger;
         private readonly JwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
         private readonly IAccountService _accountService = accountService;
+
+        /// <summary>
+        /// Private method to extract claims from a JWT token.
+        /// </summary>
+        /// <param name="token">The JWT token.</param>
+        /// <returns>A dictionary containing claim types and their values.</returns>
+        private Dictionary<string, string> ExtractClaimsFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(token);
+
+            var claims = new Dictionary<string, string>();
+            foreach (var claim in jsonToken.Claims)
+            {
+                claims[claim.Type] = claim.Value;
+            }
+
+            return claims;
+        }
 
         /// <summary>
         /// Registers a new client user using the provided information.
@@ -33,7 +53,7 @@ namespace Ayerhs.Controllers
                     _logger.LogDebug("Starting client registration process with data: {InRegisterClientDto}", inRegisterClientDto);
                     await _accountService.RegisterClientAsync(inRegisterClientDto);
                     _logger.LogInformation("Client registered successfully.");
-                    return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: "Client registered successfully", txn: ConstantData.GenerateTransactionId(), returnValue: null)); 
+                    return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: "Client registered successfully", txn: ConstantData.GenerateTransactionId(), returnValue: null));
                 }
                 else
                 {
@@ -61,10 +81,14 @@ namespace Ayerhs.Controllers
                     if (client != null)
                     {
                         var token = _jwtTokenGenerator.GenerateToken(client.ClientId!.ToString(), client.ClientEmail!, client.ClientUsername!);
+
+                        var claims = ExtractClaimsFromToken(token);
+
                         var responseDto = new LoginResponseDto
                         {
                             Token = token,
-                            Client = client
+                            Client = client,
+                            Claims = claims
                         };
                         return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto));
                     }

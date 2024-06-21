@@ -4,5 +4,6 @@
     {
         public string? Token { get; set; }
         public Clients? Client { get; set; }
+        public Dictionary<string, string>? Claims { get; set; }
     }
 }
