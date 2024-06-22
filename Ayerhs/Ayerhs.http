@@ -1,0 +1,6 @@
+@Ayerhs_HostAddress = http://localhost:5118
+
+GET {{Ayerhs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
