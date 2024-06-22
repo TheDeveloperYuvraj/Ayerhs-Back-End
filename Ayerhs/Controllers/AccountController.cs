@@ -1,6 +1,7 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
 using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Ayerhs.Core.Interfaces.Utility;
 using Ayerhs.Infrastructure.External;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,10 +13,10 @@ namespace Ayerhs.Controllers
     /// </summary>
     [ApiController]
     [Route("ayerhs-security/[controller]")]
-    public class AccountController(ILogger<AccountController> logger, JwtTokenGenerator jwtTokenGenerator, IAccountService accountService, IAccountRepository accountRepository) : ControllerBase
+    public class AccountController(ILogger<AccountController> logger, IJwtTokenGenerator jwtTokenGenerator, IAccountService accountService, IAccountRepository accountRepository) : ControllerBase
     {
         private readonly ILogger<AccountController> _logger = logger;
-        private readonly JwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
         private readonly IAccountService _accountService = accountService;
         private readonly IAccountRepository _accountRepository = accountRepository;
 
@@ -73,17 +74,7 @@ namespace Ayerhs.Controllers
         }
 
         /// <summary>
-        /// Logs in a client user using the provided email and password.
-        /// 
         /// This endpoint allows a client user to log in to the system using their email address and password.
-        /// On successful login, the endpoint returns a JWT token containing claims about the user, 
-        /// as well as the client user object and the extracted claims from the token.
-        /// 
-        /// If the login attempt fails due to invalid credentials, the endpoint returns a 200 OK response with an error message indicating "Invalid Credentials".
-        /// If the login attempt fails due to a locked account, the endpoint returns a 200 OK response with an error message indicating 
-        /// that the account is locked and the time until it unlocks.
-        /// 
-        /// Any other unexpected errors will result in a 500 Internal Server Error response.
         /// </summary>
         /// <param name="inLoginClientDto">The data transfer object containing client login information (email and password).</param>
         /// <returns>An IActionResult representing the HTTP response for the login request. The response object may contain a JWT token, client user object, and claims if login is successful, or an error message otherwise.</returns>

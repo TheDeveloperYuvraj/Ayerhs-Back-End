@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Ayerhs.Core.Interfaces.Utility;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Ayerhs.Infrastructure.External
     /// <summary>
     /// This class is responsible for generating JSON Web Tokens (JWT) used for authentication.
     /// </summary>
-    public class JwtTokenGenerator(IConfiguration configuration)
+    public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerator
     {
         private readonly IConfiguration _configuration = configuration;
 
