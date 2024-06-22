@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ayerhs.Infrastructure.Data
@@ -24,6 +25,11 @@ namespace Ayerhs.Infrastructure.Data
         public DbSet<ClientRoles> ClientRoles { get; set; }
 
         /// <summary>
+        /// DbSet for the OtpStorage entity.
+        /// </summary>
+        public DbSet<OtpStorage> OtpStorages { get; set; }
+
+        /// <summary>
         /// Configures entity mappings and relationships for the database model.
         /// </summary>
         /// <param name="modelBuilder">The model builder instance for configuration.</param>
@@ -34,6 +40,7 @@ namespace Ayerhs.Infrastructure.Data
             modelBuilder.Entity<Clients>(entity => entity.ToTable("tblclients"));
             modelBuilder.Entity<Roles>(entity => entity.ToTable("tblroles"));
             modelBuilder.Entity<ClientRoles>(entity => entity.ToTable("tblclient_roles"));
+            modelBuilder.Entity<OtpStorage>(entity => entity.ToTable("tblotp_storage"));
 
             modelBuilder.Entity<ClientRoles>()
                 .HasKey(cr => new { cr.ClientId, cr.RoleId });
