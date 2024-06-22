@@ -210,7 +210,7 @@ namespace AyerhsTests.AccountManagement
         {
             // Arrange
             SetModelStateValid();
-            var mockClients = new List<Clients>() { new Clients { ClientId = "1" }, new Clients { ClientId = "2" } };
+            var mockClients = new List<Clients>() { new() { ClientId = "1" }, new() { ClientId = "2" } };
             _mockAccountService.Setup(x => x.GetClientsAsync()).ReturnsAsync(mockClients);
 
             // Act
