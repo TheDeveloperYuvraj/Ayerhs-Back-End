@@ -21,6 +21,12 @@ namespace Ayerhs.Core.Entities.Utility
         public string? Email { get; set; }
 
         /// <summary>
+        /// Randomally generated OTP for respective Email address.
+        /// </summary>
+        [Required]
+        public string? Otp { get; set; }
+
+        /// <summary>
         /// Date and time when the OTP was generated.
         /// </summary>
         [Required]

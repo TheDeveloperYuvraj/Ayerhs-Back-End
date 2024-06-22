@@ -35,14 +35,24 @@ namespace Ayerhs.Application.Services.Utility
             }
 
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("YourAppName", _smtpSettings.Username));
+            message.From.Add(new MailboxAddress("Ayerhs", _smtpSettings.Username));
             message.To.Add(new MailboxAddress("", email));
             message.Subject = "Your OTP Code";
 
-            message.Body = new TextPart("plain")
+            if (string.IsNullOrEmpty(body) || !body.Contains("{otp}"))
             {
-                Text = string.IsNullOrEmpty(body) ? $"Your OTP code is {otp}" : body.Replace("{otp}", otp)
-            };
+                message.Body = new TextPart("plain")
+                {
+                    Text = $"Your OTP code is {otp}"
+                };
+            }
+            else
+            {
+                message.Body = new TextPart("plain")
+                {
+                    Text = body.Replace("{otp}", otp)
+                };
+            }
 
             using var client = new SmtpClient();
             try

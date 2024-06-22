@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +95,18 @@ namespace Ayerhs.Application.Repositories.AccountManagement
         {
             List<Clients> clients = await _context.Clients.ToListAsync();
             return clients;
+        }
+
+        /// <summary>
+        /// Asynchronously adds OTP details in table.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be added.</param>
+        /// <returns>A Task of entity which added into database.</returns>
+        public async Task<OtpStorage?> AddOtpAsync(OtpStorage otpStorage)
+        {
+            await _context.OtpStorages.AddAsync(otpStorage);
+            await _context.SaveChangesAsync();
+            return otpStorage;
         }
     }
 }

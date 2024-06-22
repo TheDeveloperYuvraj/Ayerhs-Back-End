@@ -9,6 +9,6 @@
         /// Asynchronously generates a new One-Time Password.
         /// </summary>
         /// <returns>A string containing the generated OTP.</returns>
-        Task<string> GenerateOtpAsync();
+        string GenerateOtpAsync();
     }
 }

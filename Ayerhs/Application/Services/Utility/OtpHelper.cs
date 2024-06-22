@@ -27,10 +27,10 @@ namespace Ayerhs.Application.Services.Utility
         /// Asynchronously generates a new One-Time Password.
         /// </summary>
         /// <returns>A task that resolves to a string containing the generated OTP.</returns>
-        public Task<string> GenerateOtpAsync()
+        public string GenerateOtpAsync()
         {
             var otp = GenerateOtp();
-            return Task.FromResult(otp);
+            return otp;
         }
     }
 }

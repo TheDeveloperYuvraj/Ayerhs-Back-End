@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 
 namespace Ayerhs.Core.Interfaces.AccountManagement
 {
@@ -54,5 +55,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// </summary>
         /// <returns>A Task represents List of Client entity.</returns>
         Task<List<Clients>?> GetClientsAsync();
+
+        /// <summary>
+        /// Asynchronously adds OTP details in table.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be added.</param>
+        /// <returns>A Task of entity which added into database.</returns>
+        Task<OtpStorage?> AddOtpAsync(OtpStorage otpStorage);
     }
 }

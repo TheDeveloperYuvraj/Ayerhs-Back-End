@@ -26,5 +26,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// </summary>
         /// <returns>A Task represents list of Clients entity.</returns>
         Task<List<Clients>?> GetClientsAsync();
+
+        /// <summary>
+        /// Asynchronously generate a random OTP and send on email
+        /// </summary>
+        /// <param name="inOtpRequestDto">A DTO containing email related data.</param>
+        /// <returns>A Task that contains a message.</returns>
+        Task<(bool, string)> OtpGenerationAndEmailAsync(InOtpRequestDto inOtpRequestDto);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Ayerhs.Core.Interfaces.Utility;
 using Konscious.Security.Cryptography;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,10 +12,12 @@ namespace Ayerhs.Application.Services.AccountManagement
     /// This class implements the IAccountService interface and provides concrete methods
     /// for account management services.
     /// </summary>
-    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository) : IAccountService
+    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IOtpHelper otpHelper, IEmailService emailService) : IAccountService
     {
         private readonly ILogger<AccountService> _logger = logger;
         private readonly IAccountRepository _accountRepository = accountRepository;
+        private readonly IOtpHelper _otpHelper = otpHelper;
+        private readonly IEmailService _emailService = emailService;
 
         #region Private Methods for Support
         /// <summary>
@@ -188,6 +192,35 @@ namespace Ayerhs.Application.Services.AccountManagement
         {
             var result = await _accountRepository.GetClientsAsync();
             return result;
+        }
+
+        /// <summary>
+        /// Asynchronously generate a random OTP and send on email
+        /// </summary>
+        /// <param name="inOtpRequestDto">A DTO containing email related data.</param>
+        /// <returns>A Task that contains a message.</returns>
+        public async Task<(bool, string)> OtpGenerationAndEmailAsync(InOtpRequestDto inOtpRequestDto)
+        {
+            var otp = _otpHelper.GenerateOtpAsync();
+            if (otp != null)
+            {
+                await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
+                var otpStorage = new OtpStorage
+                {
+                    Email = inOtpRequestDto.Email,
+                    GeneratedOn = DateTime.UtcNow,
+                    ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                    Otp = otp
+                };
+
+                await _accountRepository.AddOtpAsync(otpStorage);
+                return (true, "OTP Genrate and send successfully.");
+            }
+            else
+            {
+                _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                return (false, "OTP generation failed.");
+            }
         }
     }
 }
