@@ -85,5 +85,15 @@ namespace Ayerhs.Application.Repositories.AccountManagement
             _context.Clients.Update(clients);
             await _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Asynchronously getting registered clients
+        /// </summary>
+        /// <returns>A Task represents List of Client entity.</returns>
+        public async Task<List<Clients>?> GetClientsAsync()
+        {
+            List<Clients> clients = await _context.Clients.ToListAsync();
+            return clients;
+        }
     }
 }

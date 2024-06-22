@@ -48,5 +48,11 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="clients">The Client entity with the updated data.</param>
         /// <returns>A Task representing the asynchronous update operation.</returns>
         Task UpdateClientAsync(Clients clients);
+
+        /// <summary>
+        /// Asynchronously getting registered clients
+        /// </summary>
+        /// <returns>A Task represents List of Client entity.</returns>
+        Task<List<Clients>?> GetClientsAsync();
     }
 }

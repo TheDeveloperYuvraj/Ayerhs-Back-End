@@ -37,6 +37,11 @@
         /// </summary>
         public const string AccountLocked = "ERR-1000-006";
 
+        /// <summary>
+        /// Error code for Null Registered Clients
+        /// </summary>
+        public const string NullRegisteredClients = "ERR-1000-007";
+
 
         /// <summary>
         /// Error code indicating an unknown error occurred.

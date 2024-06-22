@@ -20,5 +20,11 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="inLoginClientDto">A DTO containing login credentials.</param>
         /// <returns>A Task that resolves to a Clients object containing user information on success, or null on failure.</returns>
         Task<Clients?> LoginClientAsync(InLoginClientDto inLoginClientDto);
+
+        /// <summary>
+        /// Asynchronously getting registered client list.
+        /// </summary>
+        /// <returns>A Task represents list of Clients entity.</returns>
+        Task<List<Clients>?> GetClientsAsync();
     }
 }

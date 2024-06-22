@@ -179,5 +179,15 @@ namespace Ayerhs.Application.Services.AccountManagement
                 return null;
             }
         }
+
+        /// <summary>
+        /// Asynchronously getting registered client list.
+        /// </summary>
+        /// <returns>A Task represents list of Clients entity.</returns>
+        public async Task<List<Clients>?> GetClientsAsync()
+        {
+            var result = await _accountRepository.GetClientsAsync();
+            return result;
+        }
     }
 }
