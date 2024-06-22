@@ -102,7 +102,7 @@ namespace Ayerhs.Core.Entities.AccountManagement
         /// <summary>
         /// Locked condition of Client Account
         /// </summary>
-        public bool? IsLocked { get; set; }
+        public bool IsLocked { get; set; }
 
         /// <summary>
         /// Login Attempt Counts

@@ -12,18 +12,20 @@ namespace Ayerhs.Controllers
     /// </summary>
     [ApiController]
     [Route("ayerhs-security/[controller]")]
-    public class AccountController(ILogger<AccountController> logger, JwtTokenGenerator jwtTokenGenerator, IAccountService accountService) : ControllerBase
+    public class AccountController(ILogger<AccountController> logger, JwtTokenGenerator jwtTokenGenerator, IAccountService accountService, IAccountRepository accountRepository) : ControllerBase
     {
         private readonly ILogger<AccountController> _logger = logger;
         private readonly JwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
         private readonly IAccountService _accountService = accountService;
+        private readonly IAccountRepository _accountRepository = accountRepository;
 
+        #region Private Helper Methods for Account Controller
         /// <summary>
         /// Private method to extract claims from a JWT token.
         /// </summary>
         /// <param name="token">The JWT token.</param>
         /// <returns>A dictionary containing claim types and their values.</returns>
-        private Dictionary<string, string> ExtractClaimsFromToken(string token)
+        private static Dictionary<string, string> ExtractClaimsFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(token);
@@ -35,7 +37,8 @@ namespace Ayerhs.Controllers
             }
 
             return claims;
-        }
+        } 
+        #endregion
 
         /// <summary>
         /// Registers a new client user using the provided information.
@@ -69,6 +72,21 @@ namespace Ayerhs.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs in a client user using the provided email and password.
+        /// 
+        /// This endpoint allows a client user to log in to the system using their email address and password.
+        /// On successful login, the endpoint returns a JWT token containing claims about the user, 
+        /// as well as the client user object and the extracted claims from the token.
+        /// 
+        /// If the login attempt fails due to invalid credentials, the endpoint returns a 200 OK response with an error message indicating "Invalid Credentials".
+        /// If the login attempt fails due to a locked account, the endpoint returns a 200 OK response with an error message indicating 
+        /// that the account is locked and the time until it unlocks.
+        /// 
+        /// Any other unexpected errors will result in a 500 Internal Server Error response.
+        /// </summary>
+        /// <param name="inLoginClientDto">The data transfer object containing client login information (email and password).</param>
+        /// <returns>An IActionResult representing the HTTP response for the login request. The response object may contain a JWT token, client user object, and claims if login is successful, or an error message otherwise.</returns>
         [Route("LoginClient")]
         [HttpPost]
         public async Task<IActionResult> LoginClient(InLoginClientDto inLoginClientDto)
@@ -94,8 +112,15 @@ namespace Ayerhs.Controllers
                     }
                     else
                     {
-                        _logger.LogError("Invalid credentials provided.");
-                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: "Invalid Credentials", errorCode: CustomErrorCodes.InvalidCredentials, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                        var lockedClient = await _accountRepository.GetClientByEmailAsync(inLoginClientDto.ClientEmail!);
+                        if (lockedClient != null && lockedClient.IsLocked)
+                        {
+                            return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: $"Account is locked until {lockedClient.LockedUntil}", errorCode: CustomErrorCodes.AccountLocked, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                        }
+                        else
+                        {
+                            return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: "Invalid Credentials", errorCode: CustomErrorCodes.InvalidCredentials, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                        }
                     }
                 }
                 else

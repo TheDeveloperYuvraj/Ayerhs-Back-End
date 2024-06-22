@@ -32,6 +32,11 @@
         /// </summary>
         public const string InvalidCredentials = "ERR-1000-005";
 
+        /// <summary>
+        /// Error code for Client Account is locked.
+        /// </summary>
+        public const string AccountLocked = "ERR-1000-006";
+
 
         /// <summary>
         /// Error code indicating an unknown error occurred.

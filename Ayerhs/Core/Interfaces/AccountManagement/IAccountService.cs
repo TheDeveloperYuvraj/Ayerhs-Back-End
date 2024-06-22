@@ -14,6 +14,11 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <returns>A Task representing the asynchronous operation.</returns>
         Task RegisterClientAsync(InRegisterClientDto inRegisterClientDto);
 
+        /// <summary>
+        /// Asynchronously attempts to login a client using the provided credentials.
+        /// </summary>
+        /// <param name="inLoginClientDto">A DTO containing login credentials.</param>
+        /// <returns>A Task that resolves to a Clients object containing user information on success, or null on failure.</returns>
         Task<Clients?> LoginClientAsync(InLoginClientDto inLoginClientDto);
     }
 }

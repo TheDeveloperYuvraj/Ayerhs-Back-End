@@ -14,6 +14,7 @@ namespace AyerhsTests.AccountManagement
     {
         private readonly Mock<ILogger<AccountController>> _mockLogger;
         private readonly Mock<IAccountService> _mockAccountService;
+        private readonly Mock<IAccountRepository> _mockAccountRepository;
         private readonly AccountController _controller;
         private readonly Faker<InRegisterClientDto> _faker;
         private readonly Mock<JwtTokenGenerator> _mockJwtTokenGenerator;
@@ -23,7 +24,8 @@ namespace AyerhsTests.AccountManagement
             _mockLogger = new Mock<ILogger<AccountController>>();
             _mockAccountService = new Mock<IAccountService>();
             _mockJwtTokenGenerator = new Mock<JwtTokenGenerator>();
-            _controller = new AccountController(_mockLogger.Object, _mockJwtTokenGenerator.Object, _mockAccountService.Object);
+            _mockAccountRepository = new Mock<IAccountRepository>();
+            _controller = new AccountController(_mockLogger.Object, _mockJwtTokenGenerator.Object, _mockAccountService.Object, _mockAccountRepository.Object);
 
             _faker = new Faker<InRegisterClientDto>()
                 .RuleFor(r => r.ClientName, f => f.Name.FullName())

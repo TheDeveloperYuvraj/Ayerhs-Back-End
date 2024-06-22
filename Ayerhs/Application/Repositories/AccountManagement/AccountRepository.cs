@@ -46,10 +46,10 @@ namespace Ayerhs.Application.Repositories.AccountManagement
         }
 
         /// <summary>
-        ///  Asynchronously retrieves a Role Name by Role ID.
+        /// Asynchronously retrieves the name of a role by its ID.
         /// </summary>
-        /// <param name="roleId">The role ID.</param>
-        /// <returns>A task that returns a string of role name.</returns>
+        /// <param name="roleId">The ID of the role to retrieve.</param>
+        /// <returns>A Task that returns the name of the role with the matching ID, or null if not found.</returns>
         public async Task<string?> GetRoleByName(int roleId)
         {
             var role = await _context.Roles.FindAsync(roleId);
@@ -73,6 +73,17 @@ namespace Ayerhs.Application.Repositories.AccountManagement
             await _context.ClientRoles.AddAsync(clientRoles!);
             await _context.SaveChangesAsync();
             return clientRoles;
+        }
+
+        /// <summary>
+        /// Asynchronously updates an existing Client entity in the database.
+        /// </summary>
+        /// <param name="clients">The Client entity to be updated.</param>
+        /// <returns>A Task that completes the update operation.</returns>
+        public async Task UpdateClientAsync(Clients clients)
+        {
+            _context.Clients.Update(clients);
+            await _context.SaveChangesAsync();
         }
     }
 }

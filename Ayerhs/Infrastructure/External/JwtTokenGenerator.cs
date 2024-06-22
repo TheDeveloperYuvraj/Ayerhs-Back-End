@@ -5,10 +5,20 @@ using System.Text;
 
 namespace Ayerhs.Infrastructure.External
 {
+    /// <summary>
+    /// This class is responsible for generating JSON Web Tokens (JWT) used for authentication.
+    /// </summary>
     public class JwtTokenGenerator(IConfiguration configuration)
     {
         private readonly IConfiguration _configuration = configuration;
 
+        /// <summary>
+        /// Generates a JWT token for a user with the specified user ID, username, and role.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="role">The user's role.</param>
+        /// <returns>The generated JWT token as a string.</returns>
         public string GenerateToken(string userId, string username, string role)
         {
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:HMACKey"]!);

@@ -97,7 +97,10 @@ namespace Ayerhs.Application.Services.AccountManagement
                 CreatedOn = DateTime.UtcNow,
                 UpdatedOn = DateTime.UtcNow,
                 DeletedOn = null,
-                AutoDeletedOn = null
+                AutoDeletedOn = null,
+                AttemptCount = 0,
+                LastLoginDateTime = DateTime.UtcNow,
+                IsLocked = false,
             };
 
             await _accountRepository.AddClientAsync(client);
@@ -114,19 +117,57 @@ namespace Ayerhs.Application.Services.AccountManagement
             }
         }
 
+        /// <summary>
+        /// Asynchronously logs in a client user using the provided email address and password.
+        /// 
+        /// Throws exceptions if the client account is locked due to failed login attempts.
+        /// 
+        /// Returns the Client entity if login is successful, otherwise null.
+        /// </summary>
+        /// <param name="inLoginClientDto">A DTO containing email address and password for login.</param>
+        /// <returns>A Task that returns the Client entity if login is successful, otherwise null.</returns>
         public async Task<Clients?> LoginClientAsync(InLoginClientDto inLoginClientDto)
         {
             var client = await _accountRepository.GetClientByEmailAsync(inLoginClientDto.ClientEmail!);
             if (client != null)
             {
+                if (client.IsLocked)
+                {
+                    if (client.LockedUntil > DateTime.UtcNow)
+                    {
+                        _logger.LogError("Client account is locked until {LockedUntil}", client.LockedUntil);
+                        return null;
+                    }
+                    else
+                    {
+                        client.IsLocked = false;
+                        client.AttemptCount = 0;
+                        await _accountRepository.UpdateClientAsync(client);
+                    }
+                }
+
                 var hashedLoginPassword = HashPassword(inLoginClientDto.ClientPassword!, client.Salt!);
                 if (hashedLoginPassword == client.ClientPassword)
                 {
                     _logger.LogInformation("Login Successful");
+
+                    client.AttemptCount = 0;
+                    client.LastLoginDateTime = DateTime.UtcNow;
+                    await _accountRepository.UpdateClientAsync(client);
+
                     return client;
                 }
                 else
                 {
+                    client.AttemptCount++;
+                    client.LastLoginDateTime = DateTime.UtcNow;
+                    if (client.AttemptCount >= 3)
+                    {
+                        client.IsLocked = true;
+                        client.LockedUntil = DateTime.UtcNow.AddMinutes(15);
+                        _logger.LogError("Client account locked due to multiple failed login attempts. Locked until {LockedUntil}", client.LockedUntil);
+                    }
+                    await _accountRepository.UpdateClientAsync(client);
                     _logger.LogError("Invalid Credentials");
                     return null;
                 }

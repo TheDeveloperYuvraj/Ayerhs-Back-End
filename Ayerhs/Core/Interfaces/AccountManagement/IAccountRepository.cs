@@ -41,5 +41,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="clientRoles">The entity which decide about the role.</param>
         /// <returns>A Task that returns assigned Client Role</returns>
         Task <ClientRoles?> AddClientRolesAsync(ClientRoles? clientRoles);
+
+        /// <summary>
+        /// Asynchronously updates an existing Client entity in the repository.
+        /// </summary>
+        /// <param name="clients">The Client entity with the updated data.</param>
+        /// <returns>A Task representing the asynchronous update operation.</returns>
+        Task UpdateClientAsync(Clients clients);
     }
 }
