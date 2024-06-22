@@ -153,6 +153,7 @@ namespace Ayerhs.Application.Services.AccountManagement
 
                     client.AttemptCount = 0;
                     client.LastLoginDateTime = DateTime.UtcNow;
+                    client.LockedUntil = null;
                     await _accountRepository.UpdateClientAsync(client);
 
                     return client;

@@ -1,6 +1,7 @@
 using Ayerhs.Application.Repositories.AccountManagement;
 using Ayerhs.Application.Services.AccountManagement;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Ayerhs.Core.Interfaces.Utility;
 using Ayerhs.Infrastructure.Data;
 using Ayerhs.Infrastructure.External;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -78,7 +79,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 // Add JwtTokenGenerator as a service
-builder.Services.AddSingleton<JwtTokenGenerator>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 var app = builder.Build();
 
