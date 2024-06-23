@@ -201,5 +201,45 @@ namespace Ayerhs.Controllers
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
             }
         }
+
+        /// <summary>
+        /// Verifies an OTP for a given email address.
+        /// </summary>
+        /// <param name="inOtpVerificationDto">Data for OTP verification (email and OTP).</param>
+        /// <returns>API response containing success/failure status and message.</returns>
+        [Route("OtpVerification")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> OtpVerification(InOtpVerificationDto inOtpVerificationDto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var (success, message) = await _accountService.OtpVerificationAsync(inOtpVerificationDto);
+                    if (success)
+                    {
+                        _logger.LogInformation("OTP verification successfully on {Email}", inOtpVerificationDto.Email);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("An error occurred while verifying OTP for client {Email}", inOtpVerificationDto.Email);
+                        return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.OtpVerification, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                    }
+                }
+                else
+                {
+                    string validationErrors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)));
+                    _logger.LogError("Model validation failed for OTP generation. Validation errors: {ValidationErrors}", validationErrors);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating OTP: {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+            }
+        }
     }
 }

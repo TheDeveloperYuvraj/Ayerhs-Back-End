@@ -267,5 +267,43 @@ namespace Ayerhs.Application.Services.AccountManagement
                 return (false, $"{inOtpRequestDto.Email} is not registered with application.");
             }
         }
+
+        /// <summary>
+        /// Verifies an OTP for a given email address.
+        /// </summary>
+        /// <param name="inOtpVerificationDto">Data for OTP verification (email and OTP).</param>
+        /// <returns>True if OTP is valid, False otherwise (with error message).</returns>
+        public async Task<(bool, string)> OtpVerificationAsync(InOtpVerificationDto inOtpVerificationDto)
+        {
+            var existingClient = await _accountRepository.GetClientByEmailAsync(inOtpVerificationDto.Email!);
+            if (existingClient != null)
+            {
+                var existingOtp = await _accountRepository.GetOtpStorageByEmailAsync(inOtpVerificationDto.Email!);
+                if (existingOtp != null)
+                {
+                    if (existingOtp.Otp == inOtpVerificationDto.Otp)
+                    {
+                        await _accountRepository.VerifyClientAsync(existingClient);
+                        _logger.LogInformation("OTP verification successfull {Email}", inOtpVerificationDto.Email);
+                        return (true, $"OTP verification successfull {inOtpVerificationDto.Email}");
+                    }
+                    else
+                    {
+                        _logger.LogError("Wrong OTP provided by client {Email}", inOtpVerificationDto.Email);
+                        return (false, $"Wrong OTP provided by client {inOtpVerificationDto.Email}");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid OTP verification request for client {Email}", inOtpVerificationDto.Email);
+                    return (false, $"Invalid OTP verification request for client {inOtpVerificationDto.Email}");
+                }
+            }
+            else
+            {
+                _logger.LogError("{Email} is not registered with application.", inOtpVerificationDto.Email);
+                return (false, $"{inOtpVerificationDto.Email} is not registered with application.");
+            }
+        }
     }
 }

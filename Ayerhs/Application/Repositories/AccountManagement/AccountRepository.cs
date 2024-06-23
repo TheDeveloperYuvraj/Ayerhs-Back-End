@@ -139,5 +139,22 @@ namespace Ayerhs.Application.Repositories.AccountManagement
             }
             return otpStorage;
         }
+
+        /// <summary>
+        /// Performs verification on a client object.
+        /// </summary>
+        /// <param name="client">The client object to be verified.</param>
+        /// <returns>A task indicating the completion of verification.</returns>
+        public async Task VerifyClientAsync(Clients client)
+        {
+            var existingClient = await _context.Clients.FirstOrDefaultAsync(x => x.ClientEmail == client.ClientEmail );
+            if (existingClient != null)
+            {
+                existingClient.IsActive = true;
+                existingClient.Status = ClientStatus.Active;
+                _context.Clients.Update(existingClient);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -76,5 +76,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="otpStorage">The entity to be updated.</param>
         /// <returns>A Task of entity which Updated into database.</returns>
         Task<OtpStorage?> UpdateOtpAsync(OtpStorage otpStorage);
+
+        /// <summary>
+        /// Performs verification on a client object.
+        /// </summary>
+        /// <param name="client">The client object to be verified.</param>
+        /// <returns>A task indicating the completion of verification.</returns>
+        Task VerifyClientAsync(Clients client);
     }
 }

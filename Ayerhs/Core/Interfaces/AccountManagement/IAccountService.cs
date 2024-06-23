@@ -33,5 +33,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="inOtpRequestDto">A DTO containing email related data.</param>
         /// <returns>A Task that contains a message.</returns>
         Task<(bool, string)> OtpGenerationAndEmailAsync(InOtpRequestDto inOtpRequestDto);
+
+        /// <summary>
+        /// Performs verification of a one-time verification code (OTP).
+        /// </summary>
+        /// <param name="inOtpVerificationDto">The data transfer object containing the email and OTP.</param>
+        /// <returns>A tuple containing a flag indicating success and an optional error message.</returns>
+        Task<(bool, string)> OtpVerificationAsync(InOtpVerificationDto inOtpVerificationDto);
     }
 }

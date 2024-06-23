@@ -47,6 +47,11 @@
         /// </summary>
         public const string OtpGeneration = "ERR-1000-008";
 
+        /// <summary>
+        /// Error code for OTP Verification.
+        /// </summary>
+        public const string OtpVerification = "ERR-1000-008";
+
 
         /// <summary>
         /// Error code indicating an unknown error occurred.
