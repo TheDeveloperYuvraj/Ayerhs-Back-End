@@ -257,5 +257,56 @@ namespace AyerhsTests.AccountManagement
             Assert.Equal(404, apiResponse.StatusCode);
             Assert.Equal("No registered clients found.", apiResponse.ErrorMessage);
         }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_ValidEmail_ReturnsSuccess()
+        {
+            // Arrange
+            var email = "test@example.com";
+            _mockAccountService.Setup(x => x.OtpGenerationAndEmailAsync(It.Is<InOtpRequestDto>(dto => dto.Email == email)))
+                .ReturnsAsync((true, "OTP generated and sent successfully"));
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto { Email = email });
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.Equal("OTP generated and sent successfully", apiResponse.SuccessMessage);
+        }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Email", "Email is required");
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto());
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal("Invalid Model State", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            var email = "test@example.com";
+            _mockAccountService.Setup(x => x.OtpGenerationAndEmailAsync(It.Is<InOtpRequestDto>(dto => dto.Email == email)))
+                .Throws(new Exception("Error"));
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto { Email = email });
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
     }
 }
