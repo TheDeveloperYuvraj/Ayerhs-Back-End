@@ -210,7 +210,7 @@ namespace Ayerhs.Application.Services.AccountManagement
                     var otp = _otpHelper.GenerateOtpAsync();
                     if (otp != null)
                     {
-                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
+                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ", true);
                         var otpStorage = new OtpStorage
                         {
                             Email = inOtpRequestDto.Email,

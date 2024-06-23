@@ -21,8 +21,9 @@ namespace Ayerhs.Application.Services.Utility
         /// <param name="email">The recipient's email address.</param>
         /// <param name="otp">The One-Time Password to include in the email body.</param>
         /// <param name="body">The custom body content of the email. If not provided, a default message with the OTP code will be used.</param>
+        /// <param name="isHtml">HTML email body.</param>
         /// <returns>An asynchronous task representing the email sending operation.</returns>
-        public async Task SendOtpEmailAsync(string email, string otp, string body)
+        public async Task SendOtpEmailAsync(string email, string otp, string body, bool isHtml = false)
         {
             if (string.IsNullOrEmpty(email))
             {
@@ -41,18 +42,18 @@ namespace Ayerhs.Application.Services.Utility
 
             if (string.IsNullOrEmpty(body) || !body.Contains("{otp}"))
             {
-                message.Body = new TextPart("plain")
-                {
-                    Text = $"Your OTP code is {otp}"
-                };
+                body = ConstantData.GetProfessionalOtpHtmlBody(otp);
+                isHtml = true;
             }
             else
             {
-                message.Body = new TextPart("plain")
-                {
-                    Text = body.Replace("{otp}", otp)
-                };
+                body = body.Replace("{otp}", otp);
             }
+
+            message.Body = new TextPart(isHtml ? "html" : "plain")
+            {
+                Text = body
+            };
 
             using var client = new SmtpClient();
             try
