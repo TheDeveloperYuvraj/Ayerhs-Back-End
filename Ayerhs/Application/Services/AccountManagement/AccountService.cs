@@ -201,25 +201,70 @@ namespace Ayerhs.Application.Services.AccountManagement
         /// <returns>A Task that contains a message.</returns>
         public async Task<(bool, string)> OtpGenerationAndEmailAsync(InOtpRequestDto inOtpRequestDto)
         {
-            var otp = _otpHelper.GenerateOtpAsync();
-            if (otp != null)
+            var client = await _accountRepository.GetClientByEmailAsync(inOtpRequestDto.Email!);
+            if (client != null)
             {
-                await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
-                var otpStorage = new OtpStorage
+                var otpStorageResponse = await _accountRepository.GetOtpStorageByEmailAsync(inOtpRequestDto.Email!);
+                if (otpStorageResponse == null)
                 {
-                    Email = inOtpRequestDto.Email,
-                    GeneratedOn = DateTime.UtcNow,
-                    ValidUpto = DateTime.UtcNow.AddMinutes(15),
-                    Otp = otp
-                };
+                    var otp = _otpHelper.GenerateOtpAsync();
+                    if (otp != null)
+                    {
+                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
+                        var otpStorage = new OtpStorage
+                        {
+                            Email = inOtpRequestDto.Email,
+                            GeneratedOn = DateTime.UtcNow,
+                            ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                            Otp = otp
+                        };
 
-                await _accountRepository.AddOtpAsync(otpStorage);
-                return (true, "OTP Genrate and send successfully.");
+                        await _accountRepository.AddOtpAsync(otpStorage);
+                        return (true, "OTP Genrate and send successfully.");
+                    }
+                    else
+                    {
+                        _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                        return (false, "OTP generation failed.");
+                    }
+                }
+                else
+                {
+                    DateTime currentDateTime = DateTime.UtcNow;
+                    if (otpStorageResponse.ValidUpto > currentDateTime)
+                    {
+                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otpStorageResponse!.Otp!, "Your OTP is: ");
+                        return (true, "OTP Genrate and send successfully."); 
+                    }
+                    else
+                    {
+                        var otp = _otpHelper.GenerateOtpAsync();
+                        if (otp != null)
+                        {
+                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
+                            var otpStorage = new OtpStorage
+                            {
+                                Email = inOtpRequestDto.Email,
+                                GeneratedOn = DateTime.UtcNow,
+                                ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                                Otp = otp
+                            };
+
+                            await _accountRepository.UpdateOtpAsync(otpStorage);
+                            return (true, "OTP Genrate and send successfully.");
+                        }
+                        else
+                        {
+                            _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                            return (false, "OTP generation failed.");
+                        }
+                    }
+                }
             }
             else
             {
-                _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
-                return (false, "OTP generation failed.");
+                _logger.LogError("{Email} is not registered with application.", inOtpRequestDto.Email);
+                return (false, $"{inOtpRequestDto.Email} is not registered with application.");
             }
         }
     }

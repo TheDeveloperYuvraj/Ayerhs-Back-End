@@ -62,5 +62,19 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="otpStorage">The entity to be added.</param>
         /// <returns>A Task of entity which added into database.</returns>
         Task<OtpStorage?> AddOtpAsync(OtpStorage otpStorage);
+
+        /// <summary>
+        /// Asynchronously getting OTP stored in database.
+        /// </summary>
+        /// <param name="email">An email of client with received.</param>
+        /// <returns>A Task with entity of OtpStorage</returns>
+        Task<OtpStorage?> GetOtpStorageByEmailAsync(string? email);
+
+        /// <summary>
+        /// Asynchronously update OTP details in database.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be updated.</param>
+        /// <returns>A Task of entity which Updated into database.</returns>
+        Task<OtpStorage?> UpdateOtpAsync(OtpStorage otpStorage);
     }
 }
