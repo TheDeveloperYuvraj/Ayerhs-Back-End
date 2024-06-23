@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +85,76 @@ namespace Ayerhs.Application.Repositories.AccountManagement
         {
             _context.Clients.Update(clients);
             await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously getting registered clients
+        /// </summary>
+        /// <returns>A Task represents List of Client entity.</returns>
+        public async Task<List<Clients>?> GetClientsAsync()
+        {
+            List<Clients> clients = await _context.Clients.ToListAsync();
+            return clients;
+        }
+
+        /// <summary>
+        /// Asynchronously adds OTP details in table.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be added.</param>
+        /// <returns>A Task of entity which added into database.</returns>
+        public async Task<OtpStorage?> AddOtpAsync(OtpStorage otpStorage)
+        {
+            await _context.OtpStorages.AddAsync(otpStorage);
+            await _context.SaveChangesAsync();
+            return otpStorage;
+        }
+
+        /// <summary>
+        /// Asynchronously getting OTP stored in database.
+        /// </summary>
+        /// <param name="email">An email of client with received.</param>
+        /// <returns>A Task with entity of OtpStorage</returns>
+        public async Task<OtpStorage?> GetOtpStorageByEmailAsync(string? email)
+        {
+            var otpStorage =  await _context.OtpStorages.FirstOrDefaultAsync(x => x.Email == email);
+            return otpStorage;
+        }
+
+        /// <summary>
+        /// Asynchronously update OTP details in database.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be updated.</param>
+        /// <returns>A Task of entity which Updated into database.</returns>
+        public async Task<OtpStorage?> UpdateOtpAsync(OtpStorage otpStorage)
+        {
+            var existingEmailRecord = await _context.OtpStorages.FirstOrDefaultAsync(x => x.Email == otpStorage.Email);
+            if (existingEmailRecord != null)
+            {
+                existingEmailRecord.GeneratedOn = otpStorage.GeneratedOn;
+                existingEmailRecord.ValidUpto = otpStorage.ValidUpto;
+                existingEmailRecord.Otp = otpStorage.Otp;
+                _context.OtpStorages.Update(existingEmailRecord);
+                await _context.SaveChangesAsync();
+                return otpStorage; 
+            }
+            return otpStorage;
+        }
+
+        /// <summary>
+        /// Performs verification on a client object.
+        /// </summary>
+        /// <param name="client">The client object to be verified.</param>
+        /// <returns>A task indicating the completion of verification.</returns>
+        public async Task VerifyClientAsync(Clients client)
+        {
+            var existingClient = await _context.Clients.FirstOrDefaultAsync(x => x.ClientEmail == client.ClientEmail );
+            if (existingClient != null)
+            {
+                existingClient.IsActive = true;
+                existingClient.Status = ClientStatus.Active;
+                _context.Clients.Update(existingClient);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

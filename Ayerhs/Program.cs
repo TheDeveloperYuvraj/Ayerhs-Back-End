@@ -1,5 +1,7 @@
 using Ayerhs.Application.Repositories.AccountManagement;
 using Ayerhs.Application.Services.AccountManagement;
+using Ayerhs.Application.Services.Utility;
+using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Core.Interfaces.Utility;
 using Ayerhs.Infrastructure.Data;
@@ -16,20 +18,29 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+
+#region Serilog Configuration Settings
 // Add serilog services to the container and read config from appsettings
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
+#endregion
 
+#region Database Configuration Settings
 // Configure DbContext with PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+#endregion
 
 #region Dependency Injection Container
+builder.Services.AddScoped<IOtpHelper, OtpHelper>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 #endregion
 
+#region Swagger
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -59,7 +70,9 @@ builder.Services.AddSwaggerGen(options =>
 
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Ayerhs.xml"));
 });
+#endregion
 
+#region JWT Token Validation Parameters
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,6 +93,17 @@ builder.Services.AddAuthentication(options =>
 
 // Add JwtTokenGenerator as a service
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+#endregion
+
+#region CORS Policy settings
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+    builder => builder.WithOrigins("http://localhost:4200")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader());
+});
+#endregion
 
 var app = builder.Build();
 
@@ -91,6 +115,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
 

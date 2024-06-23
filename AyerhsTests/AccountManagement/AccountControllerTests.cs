@@ -54,10 +54,10 @@ namespace AyerhsTests.AccountManagement
             var key = Encoding.ASCII.GetBytes("10x5kWfclNAwNq3Ou04wiWArVWtIC+HuHhEg5PLI5aw=");
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-            new Claim(ClaimTypes.Name, "TestUser")
-                }),
+                Subject = new ClaimsIdentity(
+                [
+            new(ClaimTypes.Name, "TestUser")
+                ]),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -198,6 +198,182 @@ namespace AyerhsTests.AccountManagement
 
             // Act
             var result = await _controller.LoginClient(inLoginClientDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task GetClients_AuthorizedRequest_ReturnsListOfClients()
+        {
+            // Arrange
+            SetModelStateValid();
+            var mockClients = new List<Clients>() { new() { ClientId = "1" }, new() { ClientId = "2" } };
+            _mockAccountService.Setup(x => x.GetClientsAsync()).ReturnsAsync(mockClients);
+
+            // Act
+            var result = await _controller.GetClients();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<List<Clients>>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.Equal(2, apiResponse.ReturnValue!.Count);
+        }
+
+        [Fact]
+        public async Task GetClients_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            SetModelStateValid();
+            _mockAccountService.Setup(x => x.GetClientsAsync()).Throws(new System.Exception("Error"));
+
+            // Act
+            var result = await _controller.GetClients();
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task GetClients_NoClientsFound_ReturnsNotFound()
+        {
+            // Arrange
+            SetModelStateValid();
+            _mockAccountService.Setup(x => x.GetClientsAsync())
+                .ReturnsAsync(() => null);
+
+            // Act
+            var result = await _controller.GetClients();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal(404, apiResponse.StatusCode);
+            Assert.Equal("No registered clients found.", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_ValidEmail_ReturnsSuccess()
+        {
+            // Arrange
+            var email = "test@example.com";
+            _mockAccountService.Setup(x => x.OtpGenerationAndEmailAsync(It.Is<InOtpRequestDto>(dto => dto.Email == email)))
+                .ReturnsAsync((true, "OTP generated and sent successfully"));
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto { Email = email });
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.Equal("OTP generated and sent successfully", apiResponse.SuccessMessage);
+        }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Email", "Email is required");
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto());
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal("Invalid Model State", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task OtpGenerationAndEmail_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            var email = "test@example.com";
+            _mockAccountService.Setup(x => x.OtpGenerationAndEmailAsync(It.Is<InOtpRequestDto>(dto => dto.Email == email)))
+                .Throws(new Exception("Error"));
+
+            // Act
+            var result = await _controller.OtpGenerationAndEmail(new InOtpRequestDto { Email = email });
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task OtpVerification_ValidModel_ValidOtp_ReturnsSuccess()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inOtpVerificationDto = new InOtpVerificationDto { Email = "test@example.com", Otp = "123456" };
+            _mockAccountService.Setup(x => x.OtpVerificationAsync(It.IsAny<InOtpVerificationDto>()))
+                .ReturnsAsync((true, "OTP verification successful"));
+
+            // Act
+            var result = await _controller.OtpVerification(inOtpVerificationDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.Equal("OTP verification successful", apiResponse.SuccessMessage);
+        }
+
+        [Fact]
+        public async Task OtpVerification_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("Email", "Email is required");
+
+            // Act
+            var result = await _controller.OtpVerification(new InOtpVerificationDto());
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal("Invalid Model State", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task OtpVerification_InvalidOtp_ReturnsBadRequest()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inOtpVerificationDto = new InOtpVerificationDto { Email = "test@example.com", Otp = "invalid_otp" };
+            _mockAccountService.Setup(x => x.OtpVerificationAsync(It.IsAny<InOtpVerificationDto>()))
+                .ReturnsAsync((false, "Invalid OTP"));
+
+            // Act
+            var result = await _controller.OtpVerification(inOtpVerificationDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal("Invalid OTP", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task OtpVerification_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inOtpVerificationDto = new InOtpVerificationDto { Email = "test@example.com", Otp = "123456" };
+            _mockAccountService.Setup(x => x.OtpVerificationAsync(It.IsAny<InOtpVerificationDto>()))
+                .Throws(new Exception("Error"));
+
+            // Act
+            var result = await _controller.OtpVerification(inOtpVerificationDto);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);

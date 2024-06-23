@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.Utility;
 
 namespace Ayerhs.Core.Interfaces.AccountManagement
 {
@@ -48,5 +49,39 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="clients">The Client entity with the updated data.</param>
         /// <returns>A Task representing the asynchronous update operation.</returns>
         Task UpdateClientAsync(Clients clients);
+
+        /// <summary>
+        /// Asynchronously getting registered clients
+        /// </summary>
+        /// <returns>A Task represents List of Client entity.</returns>
+        Task<List<Clients>?> GetClientsAsync();
+
+        /// <summary>
+        /// Asynchronously adds OTP details in table.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be added.</param>
+        /// <returns>A Task of entity which added into database.</returns>
+        Task<OtpStorage?> AddOtpAsync(OtpStorage otpStorage);
+
+        /// <summary>
+        /// Asynchronously getting OTP stored in database.
+        /// </summary>
+        /// <param name="email">An email of client with received.</param>
+        /// <returns>A Task with entity of OtpStorage</returns>
+        Task<OtpStorage?> GetOtpStorageByEmailAsync(string? email);
+
+        /// <summary>
+        /// Asynchronously update OTP details in database.
+        /// </summary>
+        /// <param name="otpStorage">The entity to be updated.</param>
+        /// <returns>A Task of entity which Updated into database.</returns>
+        Task<OtpStorage?> UpdateOtpAsync(OtpStorage otpStorage);
+
+        /// <summary>
+        /// Performs verification on a client object.
+        /// </summary>
+        /// <param name="client">The client object to be verified.</param>
+        /// <returns>A task indicating the completion of verification.</returns>
+        Task VerifyClientAsync(Clients client);
     }
 }
