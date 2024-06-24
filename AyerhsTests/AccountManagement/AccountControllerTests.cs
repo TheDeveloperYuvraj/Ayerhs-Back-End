@@ -114,27 +114,63 @@ namespace AyerhsTests.AccountManagement
         }
 
         [Fact]
-        public async Task LoginClient_ValidModel_ReturnsOk()
+        public async Task LoginClient_InactiveAccount_ReturnsOkWithError()
         {
             // Arrange
             SetModelStateValid();
             var inLoginClientDto = _fakerLoginClientDto.Generate();
-            var client = new Clients { ClientId = "1", ClientEmail = inLoginClientDto.ClientEmail, ClientUsername = "TestUser" };
+            var client = new Clients { ClientId = "1", ClientEmail = inLoginClientDto.ClientEmail, ClientUsername = "TestUser", IsActive = false, Status = ClientStatus.Inactive };
 
             _mockAccountService.Setup(x => x.LoginClientAsync(It.IsAny<InLoginClientDto>())).ReturnsAsync(client);
-            var validToken = GenerateValidToken();
-            _mockJwtTokenGenerator.Setup(x => x.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(validToken);
 
             // Act
             var result = await _controller.LoginClient(inLoginClientDto);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var apiResponse = Assert.IsType<ApiResponse<LoginResponseDto>>(okResult.Value);
-            Assert.Equal("Success", apiResponse.Status);
-            Assert.NotNull(apiResponse.ReturnValue!.Token);
-            Assert.NotNull(apiResponse.ReturnValue.Client);
-            Assert.NotNull(apiResponse.ReturnValue.Claims);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Contains("Account is not activated", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task LoginClient_JwtTokenGenerationFails_ReturnsBadRequest()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inLoginClientDto = _fakerLoginClientDto.Generate();
+            var client = new Clients { ClientId = "1", ClientEmail = inLoginClientDto.ClientEmail, ClientUsername = "TestUser", IsActive = true, Status = ClientStatus.Active };
+
+            _mockAccountService.Setup(x => x.LoginClientAsync(It.IsAny<InLoginClientDto>())).ReturnsAsync(client);
+            _mockJwtTokenGenerator.Setup(x => x.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Token generation failed"));
+
+            // Act
+            var result = await _controller.LoginClient(inLoginClientDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Contains("Token generation failed", apiResponse.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task LoginClient_AccountLockedWithoutLockedUntil_ReturnsOkWithError()
+        {
+            // Arrange
+            var inLoginClientDto = _fakerLoginClientDto.Generate();
+            var lockedClient = new Clients { ClientEmail = inLoginClientDto.ClientEmail, IsLocked = true, LockedUntil = null };
+            _mockAccountService.Setup(x => x.LoginClientAsync(It.IsAny<InLoginClientDto>())).ReturnsAsync((Clients)null!);
+            _mockAccountRepository.Setup(x => x.GetClientByEmailAsync(It.IsAny<string>())).ReturnsAsync(lockedClient);
+
+            // Act
+            var result = await _controller.LoginClient(inLoginClientDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Contains("Account is locked", apiResponse.ErrorMessage);
         }
 
         [Fact]
@@ -203,6 +239,48 @@ namespace AyerhsTests.AccountManagement
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task LoginClient_SuccessfulLogin_ReturnsOkWithToken()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inLoginClientDto = _fakerLoginClientDto.Generate();
+            var client = new Clients { ClientId = "1", ClientEmail = inLoginClientDto.ClientEmail, ClientUsername = "TestUser", IsActive = true, Status = ClientStatus.Active };
+            var token = GenerateValidToken();
+
+            _mockAccountService.Setup(x => x.LoginClientAsync(It.IsAny<InLoginClientDto>())).ReturnsAsync(client);
+            _mockJwtTokenGenerator.Setup(x => x.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(token);
+
+            // Act
+            var result = await _controller.LoginClient(inLoginClientDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<LoginResponseDto>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.NotNull(apiResponse.ReturnValue!.Token);
+        }
+
+        [Fact]
+        public async Task LoginClient_InactiveAccountDifferentStatus_ReturnsOkWithError()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inLoginClientDto = _fakerLoginClientDto.Generate();
+            var client = new Clients { ClientId = "1", ClientEmail = inLoginClientDto.ClientEmail, ClientUsername = "TestUser", IsActive = false, Status = ClientStatus.Suspended };
+
+            _mockAccountService.Setup(x => x.LoginClientAsync(It.IsAny<InLoginClientDto>())).ReturnsAsync(client);
+
+            // Act
+            var result = await _controller.LoginClient(inLoginClientDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Contains("Account is not activated", apiResponse.ErrorMessage);
         }
 
         [Fact]
