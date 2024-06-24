@@ -60,17 +60,24 @@ namespace Ayerhs.Controllers
                     var client = await _accountService.LoginClientAsync(inLoginClientDto);
                     if (client != null)
                     {
-                        var token = _jwtTokenGenerator.GenerateToken(client.ClientId!.ToString(), client.ClientEmail!, client.ClientUsername!);
-
-                        var claims = ExtractClaimsFromToken(token);
-
-                        var responseDto = new LoginResponseDto
+                        if (client.IsActive == true && client.Status == ClientStatus.Active)
                         {
-                            Token = token,
-                            Client = client,
-                            Claims = claims
-                        };
-                        return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto));
+                            var token = _jwtTokenGenerator.GenerateToken(client.ClientId!.ToString(), client.ClientEmail!, client.ClientUsername!);
+
+                            var claims = ExtractClaimsFromToken(token);
+
+                            var responseDto = new LoginResponseDto
+                            {
+                                Token = token,
+                                Client = client,
+                                Claims = claims
+                            };
+                            return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto)); 
+                        }
+                        else
+                        {
+                            return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: $"Account is not activated for user {inLoginClientDto.ClientEmail}. Please activate your account.", errorCode: CustomErrorCodes.AccountActivation, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                        }
                     }
                     else
                     {

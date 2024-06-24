@@ -52,6 +52,11 @@
         /// </summary>
         public const string OtpVerification = "ERR-1000-008";
 
+        /// <summary>
+        /// Error code for Account Activation
+        /// </summary>
+        public const string AccountActivation = "ERR-1000-009";
+
 
         /// <summary>
         /// Error code indicating an unknown error occurred.
