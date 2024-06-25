@@ -259,7 +259,8 @@ namespace Ayerhs.Application.Services.AccountManagement
                                     Email = inOtpRequestDto.Email,
                                     GeneratedOn = DateTime.UtcNow,
                                     ValidUpto = DateTime.UtcNow.AddMinutes(15),
-                                    Otp = otp
+                                    Otp = otp,
+                                    Use = (int)OtpUse.AccountActivate
                                 };
 
                                 await _accountRepository.UpdateOtpAsync(otpStorage);
@@ -319,7 +320,8 @@ namespace Ayerhs.Application.Services.AccountManagement
                                     Email = inOtpRequestDto.Email,
                                     GeneratedOn = DateTime.UtcNow,
                                     ValidUpto = DateTime.UtcNow.AddMinutes(15),
-                                    Otp = otp
+                                    Otp = otp,
+                                    Use = (int)OtpUse.ForgotClientPassword
                                 };
 
                                 await _accountRepository.UpdateOtpAsync(otpStorage);
