@@ -2,7 +2,6 @@
 using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Core.Interfaces.Utility;
-using Ayerhs.Infrastructure.External;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -48,6 +47,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inLoginClientDto">The data transfer object containing client login information (email and password).</param>
         /// <returns>An IActionResult representing the HTTP response for the login request. The response object may contain a JWT token, client user object, and claims if login is successful, or an error message otherwise.</returns>
+        [ProducesResponseType(typeof(Clients), 200)]
         [Route("LoginClient")]
         [HttpPost]
         [AllowAnonymous]
@@ -72,7 +72,7 @@ namespace Ayerhs.Controllers
                                 Client = client,
                                 Claims = claims
                             };
-                            return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto)); 
+                            return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto));
                         }
                         else
                         {
@@ -111,6 +111,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inRegisterClientDto">The data transfer object containing client registration information.</param>
         /// <returns>An IActionResult representing the HTTP response for the registration request.</returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [Route("RegisterClient")]
         [HttpPost]
         [AllowAnonymous]
@@ -144,9 +145,10 @@ namespace Ayerhs.Controllers
         /// This endpoint requires authorization (bearer token) to be accessed.
         /// </summary>
         /// <returns>An `IActionResult` containing the list of retrieved clients or an error message if unsuccessful.</returns>
+        [ProducesResponseType(typeof(List<Clients>), 200)]
         [Route("GetClients")]
         [HttpGet]
-        [Authorize(Roles = "Admin, ClientManager")]
+        [Authorize]
         public async Task<IActionResult> GetClients()
         {
             try
@@ -155,7 +157,7 @@ namespace Ayerhs.Controllers
                 var result = await _accountService.GetClientsAsync();
                 if (result != null)
                 {
-                    return Ok(new ApiResponse<List<Clients>>(status: "Success", statusCode: 200, response: 1, successMessage: "Clients fetched successfully.", txn: ConstantData.GenerateTransactionId(), returnValue: result)); 
+                    return Ok(new ApiResponse<List<Clients>>(status: "Success", statusCode: 200, response: 1, successMessage: "Clients fetched successfully.", txn: ConstantData.GenerateTransactionId(), returnValue: result));
                 }
                 else
                 {
@@ -174,6 +176,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inOtpRequestDto">The request object containing the email address for which to generate OTP.</param>
         /// <returns>An ApiResponse object indicating the success or failure of the operation.</returns>
+        [ProducesResponseType(typeof(string), 200)]
         [Route("OtpGenerationAndEmail")]
         [HttpPost]
         [AllowAnonymous]
@@ -214,6 +217,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inOtpVerificationDto">Data for OTP verification (email and OTP).</param>
         /// <returns>API response containing success/failure status and message.</returns>
+        [ProducesResponseType(typeof(string), 200)]
         [Route("OtpVerification")]
         [HttpPost]
         [AllowAnonymous]
@@ -242,7 +246,48 @@ namespace Ayerhs.Controllers
                     return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating OTP: {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+            }
+        }
+
+        /// <summary>
+        /// Resets a client's password based on their email.
+        /// </summary>
+        /// <param name="inForgotClientPassword">Email address of the client requesting password reset.</param>
+        /// <returns>An HTTP response indicating success or failure.</returns>
+        [ProducesResponseType(typeof(string), 200)]
+        [Route("ForgotClientPassword")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotClientPassword(InForgotClientPassword inForgotClientPassword)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var (success, message) = await _accountService.ForgotClientPasswordAsync(inForgotClientPassword);
+                    if (success)
+                    {
+                        _logger.LogInformation("Password changed for Client {Email}", inForgotClientPassword.ClientEmail);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("An error occurred while forgoting password of client {Email}", inForgotClientPassword.ClientEmail);
+                        return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.ForgotClientPassword, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    string validationErrors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)));
+                    _logger.LogError("Model validation failed for OTP generation. Validation errors: {ValidationErrors}", validationErrors);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                }
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while generating OTP: {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));

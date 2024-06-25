@@ -34,6 +34,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 #endregion
 
 #region Dependency Injection Container
+builder.Services.AddScoped<IAesEncryptionDecryptionService, AesEncryptionDecryptionService>();
 builder.Services.AddScoped<IOtpHelper, OtpHelper>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();

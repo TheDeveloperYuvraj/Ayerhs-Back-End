@@ -57,6 +57,11 @@
         /// </summary>
         public const string AccountActivation = "ERR-1000-009";
 
+        /// <summary>
+        /// Error code for Forgot Password
+        /// </summary>
+        public const string ForgotClientPassword = "ERR-1000-010";
+
 
         /// <summary>
         /// Error code indicating an unknown error occurred.

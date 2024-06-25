@@ -12,12 +12,13 @@ namespace Ayerhs.Application.Services.AccountManagement
     /// This class implements the IAccountService interface and provides concrete methods
     /// for account management services.
     /// </summary>
-    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IOtpHelper otpHelper, IEmailService emailService) : IAccountService
+    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IOtpHelper otpHelper, IEmailService emailService, IAesEncryptionDecryptionService aesEncryptionDecryptionService) : IAccountService
     {
         private readonly ILogger<AccountService> _logger = logger;
         private readonly IAccountRepository _accountRepository = accountRepository;
         private readonly IOtpHelper _otpHelper = otpHelper;
         private readonly IEmailService _emailService = emailService;
+        private readonly IAesEncryptionDecryptionService _aesEncryptionDecryptionService = aesEncryptionDecryptionService;
 
         #region Private Methods for Support
         /// <summary>
@@ -70,6 +71,7 @@ namespace Ayerhs.Application.Services.AccountManagement
         /// <returns>A Task representing the asynchronous operation.</returns>
         public async Task RegisterClientAsync(InRegisterClientDto inRegisterClientDto)
         {
+            inRegisterClientDto.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inRegisterClientDto.ClientPassword!);
             var existingClient = await _accountRepository.GetClientByEmailAsync(inRegisterClientDto.ClientEmail!);
             if (existingClient != null)
             {
@@ -80,6 +82,12 @@ namespace Ayerhs.Application.Services.AccountManagement
             if (existingClient != null)
             {
                 throw new InvalidOperationException("Client username already exists.");
+            }
+
+            existingClient = await _accountRepository.GetClientByMobileNumberAsync(inRegisterClientDto.ClientMobileNumber!);
+            if (existingClient != null)
+            {
+                throw new InvalidOperationException("Client mobile number already exists.");
             }
 
             var salt = GetGenerateSalt();
@@ -150,6 +158,7 @@ namespace Ayerhs.Application.Services.AccountManagement
                     }
                 }
 
+                inLoginClientDto.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inLoginClientDto.ClientPassword!);
                 var hashedLoginPassword = HashPassword(inLoginClientDto.ClientPassword!, client.Salt!);
                 if (hashedLoginPassword == client.ClientPassword)
                 {
@@ -204,53 +213,25 @@ namespace Ayerhs.Application.Services.AccountManagement
             var client = await _accountRepository.GetClientByEmailAsync(inOtpRequestDto.Email!);
             if (client != null)
             {
-                var otpStorageResponse = await _accountRepository.GetOtpStorageByEmailAsync(inOtpRequestDto.Email!);
-                if (otpStorageResponse == null)
+                if (inOtpRequestDto.Use == OtpUse.AccountActivate)
                 {
-                    var otp = _otpHelper.GenerateOtpAsync();
-                    if (otp != null)
-                    {
-                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ", true);
-                        var otpStorage = new OtpStorage
-                        {
-                            Email = inOtpRequestDto.Email,
-                            GeneratedOn = DateTime.UtcNow,
-                            ValidUpto = DateTime.UtcNow.AddMinutes(15),
-                            Otp = otp
-                        };
-
-                        await _accountRepository.AddOtpAsync(otpStorage);
-                        return (true, "OTP Genrate and send successfully.");
-                    }
-                    else
-                    {
-                        _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
-                        return (false, "OTP generation failed.");
-                    }
-                }
-                else
-                {
-                    DateTime currentDateTime = DateTime.UtcNow;
-                    if (otpStorageResponse.ValidUpto > currentDateTime)
-                    {
-                        await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otpStorageResponse!.Otp!, "Your OTP is: ");
-                        return (true, "OTP Genrate and send successfully."); 
-                    }
-                    else
+                    var otpStorageResponse = await _accountRepository.GetOtpStorageByEmailAsync(inOtpRequestDto.Email!);
+                    if (otpStorageResponse == null)
                     {
                         var otp = _otpHelper.GenerateOtpAsync();
                         if (otp != null)
                         {
-                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Your OTP is: ");
+                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Ayerhs - Account Activation Code", "Your One Time Password (OTP) is: ", true);
                             var otpStorage = new OtpStorage
                             {
                                 Email = inOtpRequestDto.Email,
                                 GeneratedOn = DateTime.UtcNow,
                                 ValidUpto = DateTime.UtcNow.AddMinutes(15),
-                                Otp = otp
+                                Otp = otp,
+                                Use = (int)OtpUse.AccountActivate
                             };
 
-                            await _accountRepository.UpdateOtpAsync(otpStorage);
+                            await _accountRepository.AddOtpAsync(otpStorage);
                             return (true, "OTP Genrate and send successfully.");
                         }
                         else
@@ -259,6 +240,105 @@ namespace Ayerhs.Application.Services.AccountManagement
                             return (false, "OTP generation failed.");
                         }
                     }
+                    else
+                    {
+                        DateTime currentDateTime = DateTime.UtcNow;
+                        if (otpStorageResponse.ValidUpto > currentDateTime)
+                        {
+                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otpStorageResponse!.Otp!, "Ayerhs - Account Activation Code", "Your One Time Password (OTP) is: ", true);
+                            return (true, "OTP Genrate and send successfully.");
+                        }
+                        else
+                        {
+                            var otp = _otpHelper.GenerateOtpAsync();
+                            if (otp != null)
+                            {
+                                await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Ayerhs - Account Activation Code", "Your One Time Password (OTP) is: ", true);
+                                var otpStorage = new OtpStorage
+                                {
+                                    Email = inOtpRequestDto.Email,
+                                    GeneratedOn = DateTime.UtcNow,
+                                    ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                                    Otp = otp,
+                                    Use = (int)OtpUse.AccountActivate
+                                };
+
+                                await _accountRepository.UpdateOtpAsync(otpStorage);
+                                return (true, "OTP Genrate and send successfully.");
+                            }
+                            else
+                            {
+                                _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                                return (false, "OTP generation failed.");
+                            }
+                        }
+                    } 
+                }
+                else if (inOtpRequestDto.Use == OtpUse.ForgotClientPassword)
+                {
+                    var otpStorageResponse = await _accountRepository.GetOtpStorageByEmailAsync(inOtpRequestDto.Email!);
+                    if (otpStorageResponse == null)
+                    {
+                        var otp = _otpHelper.GenerateOtpAsync();
+                        if (otp != null)
+                        {
+                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Ayerhs - Forgot Password Code", "Your One Time Password (OTP) is: ", true);
+                            var otpStorage = new OtpStorage
+                            {
+                                Email = inOtpRequestDto.Email,
+                                GeneratedOn = DateTime.UtcNow,
+                                ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                                Otp = otp,
+                                Use = (int)OtpUse.ForgotClientPassword
+                            };
+
+                            await _accountRepository.AddOtpAsync(otpStorage);
+                            return (true, "OTP Genrate and send successfully.");
+                        }
+                        else
+                        {
+                            _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                            return (false, "OTP generation failed.");
+                        }
+                    }
+                    else
+                    {
+                        DateTime currentDateTime = DateTime.UtcNow;
+                        if (otpStorageResponse.ValidUpto > currentDateTime)
+                        {
+                            await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otpStorageResponse!.Otp!, "Ayerhs - Forgot Password Code", "Your One Time Password (OTP) is: ", true);
+                            return (true, "OTP Genrate and send successfully.");
+                        }
+                        else
+                        {
+                            var otp = _otpHelper.GenerateOtpAsync();
+                            if (otp != null)
+                            {
+                                await _emailService.SendOtpEmailAsync(inOtpRequestDto.Email!, otp, "Ayerhs - Forgot Password Code", "Your One Time Password (OTP) is: ", true);
+                                var otpStorage = new OtpStorage
+                                {
+                                    Email = inOtpRequestDto.Email,
+                                    GeneratedOn = DateTime.UtcNow,
+                                    ValidUpto = DateTime.UtcNow.AddMinutes(15),
+                                    Otp = otp,
+                                    Use = (int)OtpUse.ForgotClientPassword
+                                };
+
+                                await _accountRepository.UpdateOtpAsync(otpStorage);
+                                return (true, "OTP Genrate and send successfully.");
+                            }
+                            else
+                            {
+                                _logger.LogError("An error occurred while generation OTP for user email {Email}", inOtpRequestDto.Email);
+                                return (false, "OTP generation failed.");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid OTP use provided.");
+                    return (false, "Invalid OTP use provided.");
                 }
             }
             else
@@ -303,6 +383,65 @@ namespace Ayerhs.Application.Services.AccountManagement
             {
                 _logger.LogError("{Email} is not registered with application.", inOtpVerificationDto.Email);
                 return (false, $"{inOtpVerificationDto.Email} is not registered with application.");
+            }
+        }
+
+        /// <summary>
+        /// Resets a client's password based on the provided information in the `inForgotClientPassword` object.
+        /// </summary>
+        /// <param name="inForgotClientPassword">An object containing the client's email and potentially their new password.</param>
+        /// <returns>A tuple indicating success (bool) and an optional message (string) related to the operation.</returns>
+        public async Task<(bool, string)> ForgotClientPasswordAsync(InForgotClientPassword inForgotClientPassword)
+        {
+            try
+            {
+                var client = await _accountRepository.GetClientByEmailAsync(inForgotClientPassword.ClientEmail!);
+                if (client != null)
+                {
+                    inForgotClientPassword.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inForgotClientPassword.ClientPassword!);
+
+                    var existingOtp = await _accountRepository.GetOtpStorageByEmailAsync(inForgotClientPassword.ClientEmail!);
+
+                    if (existingOtp != null)
+                    {
+                        if (existingOtp.Otp == inForgotClientPassword.Otp && existingOtp.Use == 2)
+                        {
+                            var salt = client.Salt;
+                            var hashedNewPassword = HashPassword(inForgotClientPassword.ClientPassword!, salt!);
+                            if (hashedNewPassword != null)
+                            {
+                                client.ClientPassword = hashedNewPassword;
+                                await _accountRepository.UpdateClientAsync(client);
+                                return (true, $"Password changed successfully for User {inForgotClientPassword.ClientEmail}");
+                            }
+                            else
+                            {
+                                _logger.LogError("An error occurred while hashing password.");
+                                return (false, "An error occurred while hashing password.");
+                            } 
+                        }
+                        else
+                        {
+                            _logger.LogError("Invalid OTP provided by client {Email}", inForgotClientPassword.ClientEmail);
+                            return (false, "Invalid OTP provided check again.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogError("Invalid OTP provided by client {Email}", inForgotClientPassword.ClientEmail);
+                        return (false, "Invalid OTP provided check again.");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("User {Email} not found", inForgotClientPassword.ClientEmail);
+                    return (false, $"User not registered with the application. {inForgotClientPassword.ClientEmail}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while forgoting client password {Message}", ex.Message);
+                return (false, ex.Message);
             }
         }
     }
