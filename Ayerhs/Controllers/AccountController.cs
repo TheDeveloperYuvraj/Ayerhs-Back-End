@@ -47,6 +47,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inLoginClientDto">The data transfer object containing client login information (email and password).</param>
         /// <returns>An IActionResult representing the HTTP response for the login request. The response object may contain a JWT token, client user object, and claims if login is successful, or an error message otherwise.</returns>
+        [ProducesResponseType(typeof(Clients), 200)]
         [Route("LoginClient")]
         [HttpPost]
         [AllowAnonymous]
@@ -110,6 +111,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inRegisterClientDto">The data transfer object containing client registration information.</param>
         /// <returns>An IActionResult representing the HTTP response for the registration request.</returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [Route("RegisterClient")]
         [HttpPost]
         [AllowAnonymous]
@@ -143,6 +145,7 @@ namespace Ayerhs.Controllers
         /// This endpoint requires authorization (bearer token) to be accessed.
         /// </summary>
         /// <returns>An `IActionResult` containing the list of retrieved clients or an error message if unsuccessful.</returns>
+        [ProducesResponseType(typeof(List<Clients>), 200)]
         [Route("GetClients")]
         [HttpGet]
         [Authorize]
@@ -173,6 +176,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inOtpRequestDto">The request object containing the email address for which to generate OTP.</param>
         /// <returns>An ApiResponse object indicating the success or failure of the operation.</returns>
+        [ProducesResponseType(typeof(string), 200)]
         [Route("OtpGenerationAndEmail")]
         [HttpPost]
         [AllowAnonymous]
@@ -213,6 +217,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="inOtpVerificationDto">Data for OTP verification (email and OTP).</param>
         /// <returns>API response containing success/failure status and message.</returns>
+        [ProducesResponseType(typeof(string), 200)]
         [Route("OtpVerification")]
         [HttpPost]
         [AllowAnonymous]
