@@ -398,18 +398,36 @@ namespace Ayerhs.Application.Services.AccountManagement
                 var client = await _accountRepository.GetClientByEmailAsync(inForgotClientPassword.ClientEmail!);
                 if (client != null)
                 {
-                    var salt = client.Salt;
-                    var hashedNewPassword = HashPassword(inForgotClientPassword.ClientPassword!, salt!);
-                    if (hashedNewPassword != null)
+                    var existingOtp = await _accountRepository.GetOtpStorageByEmailAsync(inForgotClientPassword.ClientEmail!);
+
+                    if (existingOtp != null)
                     {
-                        client.ClientPassword = hashedNewPassword;
-                        await _accountRepository.UpdateClientAsync(client);
-                        return (true, $"Password changed successfully for User {inForgotClientPassword.ClientEmail}");
+                        if (existingOtp.Otp == inForgotClientPassword.Otp && existingOtp.Use == 2)
+                        {
+                            var salt = client.Salt;
+                            var hashedNewPassword = HashPassword(inForgotClientPassword.ClientPassword!, salt!);
+                            if (hashedNewPassword != null)
+                            {
+                                client.ClientPassword = hashedNewPassword;
+                                await _accountRepository.UpdateClientAsync(client);
+                                return (true, $"Password changed successfully for User {inForgotClientPassword.ClientEmail}");
+                            }
+                            else
+                            {
+                                _logger.LogError("An error occurred while hashing password.");
+                                return (false, "An error occurred while hashing password.");
+                            } 
+                        }
+                        else
+                        {
+                            _logger.LogError("Invalid OTP provided by client {Email}", inForgotClientPassword.ClientEmail);
+                            return (false, "Invalid OTP provided check again.");
+                        }
                     }
                     else
                     {
-                        _logger.LogError("An error occurred while hashing password.");
-                        return (false, "An error occurred while hashing password.");
+                        _logger.LogError("Invalid OTP provided by client {Email}", inForgotClientPassword.ClientEmail);
+                        return (false, "Invalid OTP provided check again.");
                     }
                 }
                 else
