@@ -398,6 +398,8 @@ namespace Ayerhs.Application.Services.AccountManagement
                 var client = await _accountRepository.GetClientByEmailAsync(inForgotClientPassword.ClientEmail!);
                 if (client != null)
                 {
+                    inForgotClientPassword.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inForgotClientPassword.ClientPassword!);
+
                     var existingOtp = await _accountRepository.GetOtpStorageByEmailAsync(inForgotClientPassword.ClientEmail!);
 
                     if (existingOtp != null)
