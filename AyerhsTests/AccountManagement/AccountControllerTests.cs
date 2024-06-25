@@ -458,5 +458,57 @@ namespace AyerhsTests.AccountManagement
             var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", apiResponse.Status);
         }
+
+        [Fact]
+        public async Task ForgotClientPassword_ValidModel_ReturnsOk()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inForgotClientPassword = new InForgotClientPassword { ClientEmail = "test@email.com" };
+            _mockAccountService.Setup(x => x.ForgotClientPasswordAsync(It.IsAny<InForgotClientPassword>()))
+                .Returns(Task.FromResult((true, "Success message")));
+
+            // Act
+            var result = await _controller.ForgotClientPassword(inForgotClientPassword);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task ForgotClientPassword_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            var inForgotClientPassword = new InForgotClientPassword();
+            _controller.ModelState.AddModelError("Error", "Model is invalid");
+
+            // Act
+            var result = await _controller.ForgotClientPassword(inForgotClientPassword);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task ForgotClientPassword_ServiceThrowsException_ReturnsBadRequest()
+        {
+            // Arrange
+            SetModelStateValid();
+            var inForgotClientPassword = new InForgotClientPassword { ClientEmail = "test@email.com" };
+            _mockAccountService.Setup(x => x.ForgotClientPasswordAsync(It.IsAny<InForgotClientPassword>()))
+              .Throws(new System.Exception("Error"));
+
+            // Act
+            var result = await _controller.ForgotClientPassword(inForgotClientPassword);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
     }
 }

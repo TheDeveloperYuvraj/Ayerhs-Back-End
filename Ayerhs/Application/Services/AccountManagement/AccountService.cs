@@ -314,5 +314,44 @@ namespace Ayerhs.Application.Services.AccountManagement
                 return (false, $"{inOtpVerificationDto.Email} is not registered with application.");
             }
         }
+
+        /// <summary>
+        /// Resets a client's password based on the provided information in the `inForgotClientPassword` object.
+        /// </summary>
+        /// <param name="inForgotClientPassword">An object containing the client's email and potentially their new password.</param>
+        /// <returns>A tuple indicating success (bool) and an optional message (string) related to the operation.</returns>
+        public async Task<(bool, string)> ForgotClientPasswordAsync(InForgotClientPassword inForgotClientPassword)
+        {
+            try
+            {
+                var client = await _accountRepository.GetClientByEmailAsync(inForgotClientPassword.ClientEmail!);
+                if (client != null)
+                {
+                    var salt = client.Salt;
+                    var hashedNewPassword = HashPassword(inForgotClientPassword.ClientPassword!, salt!);
+                    if (hashedNewPassword != null)
+                    {
+                        client.ClientPassword = hashedNewPassword;
+                        await _accountRepository.UpdateClientAsync(client);
+                        return (true, $"Password changed successfully for User {inForgotClientPassword.ClientEmail}");
+                    }
+                    else
+                    {
+                        _logger.LogError("An error occurred while hashing password.");
+                        return (false, "An error occurred while hashing password.");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("User {Email} not found", inForgotClientPassword.ClientEmail);
+                    return (false, $"User not registered with the application. {inForgotClientPassword.ClientEmail}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while forgoting client password {Message}", ex.Message);
+                return (false, ex.Message);
+            }
+        }
     }
 }

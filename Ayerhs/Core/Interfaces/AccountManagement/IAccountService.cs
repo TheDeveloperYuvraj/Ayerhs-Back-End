@@ -40,5 +40,12 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         /// <param name="inOtpVerificationDto">The data transfer object containing the email and OTP.</param>
         /// <returns>A tuple containing a flag indicating success and an optional error message.</returns>
         Task<(bool, string)> OtpVerificationAsync(InOtpVerificationDto inOtpVerificationDto);
+
+        /// <summary>
+        /// Attempts to reset a client's password based on the provided information.
+        /// </summary>
+        /// <param name="inForgotClientPassword">An object containing the client's email and potentially their new password.</param>
+        /// <returns>A tuple indicating success (bool) and an optional message (string) related to the operation.</returns>
+        Task<(bool, string)> ForgotClientPasswordAsync(InForgotClientPassword inForgotClientPassword);
     }
 }

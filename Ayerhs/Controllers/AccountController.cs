@@ -252,5 +252,46 @@ namespace Ayerhs.Controllers
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
             }
         }
+
+        /// <summary>
+        /// Resets a client's password based on their email.
+        /// </summary>
+        /// <param name="inForgotClientPassword">Email address of the client requesting password reset.</param>
+        /// <returns>An HTTP response indicating success or failure.</returns>
+        [ProducesResponseType(typeof(string), 200)]
+        [Route("ForgotClientPassword")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotClientPassword(InForgotClientPassword inForgotClientPassword)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var (success, message) = await _accountService.ForgotClientPasswordAsync(inForgotClientPassword);
+                    if (success)
+                    {
+                        _logger.LogInformation("Password changed for Client {Email}", inForgotClientPassword.ClientEmail);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("An error occurred while forgoting password of client {Email}", inForgotClientPassword.ClientEmail);
+                        return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.ForgotClientPassword, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    string validationErrors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)));
+                    _logger.LogError("Model validation failed for OTP generation. Validation errors: {ValidationErrors}", validationErrors);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating OTP: {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+            }
+        }
     }
 }
