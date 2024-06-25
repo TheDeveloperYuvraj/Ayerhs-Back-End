@@ -11,6 +11,11 @@
         public string? ClientEmail { get; set; }
 
         /// <summary>
+        /// The OTP received on gmail for forgot password
+        /// </summary>
+        public string? Otp { get; set; }
+
+        /// <summary>
         /// The new password for the client (used after reset). 
         /// This property might be null if the request is only to send a reset email.
         /// </summary>
