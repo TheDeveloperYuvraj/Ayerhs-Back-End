@@ -146,7 +146,7 @@ namespace Ayerhs.Controllers
         /// <returns>An `IActionResult` containing the list of retrieved clients or an error message if unsuccessful.</returns>
         [Route("GetClients")]
         [HttpGet]
-        [Authorize(Roles = "Admin, ClientManager")]
+        [Authorize]
         public async Task<IActionResult> GetClients()
         {
             try
