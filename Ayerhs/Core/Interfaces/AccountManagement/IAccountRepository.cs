@@ -30,6 +30,13 @@ namespace Ayerhs.Core.Interfaces.AccountManagement
         Task<Clients?> GetClientByUsernameAsync(string username);
 
         /// <summary>
+        /// Asynchronously retrieves a Client entity by mobile number.
+        /// </summary>
+        /// <param name="mobileNumber">The mobile number of the Client to retrieve.</param>
+        /// <returns>A Task that returns the Client entity with the matching mobile number, or null if not found.</returns>
+        Task<Clients?> GetClientByMobileNumberAsync(string mobileNumber);
+
+        /// <summary>
         /// Asynchronously retrieve a role by ID.
         /// </summary>
         /// <param name="roleId">The ID of role.</param>

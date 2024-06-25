@@ -47,6 +47,16 @@ namespace Ayerhs.Application.Repositories.AccountManagement
         }
 
         /// <summary>
+        /// Asynchronously retrieves a Client entity by mobile number.
+        /// </summary>
+        /// <param name="mobileNumber">The mobile number of the Client to retrieve.</param>
+        /// <returns>A Task that returns the Client entity with the matching mobile number, or null if not found.</returns>
+        public async Task<Clients?> GetClientByMobileNumberAsync(string mobileNumber)
+        {
+            return await _context.Clients.SingleOrDefaultAsync(m => m.ClientMobileNumber == mobileNumber);
+        }
+
+        /// <summary>
         /// Asynchronously retrieves the name of a role by its ID.
         /// </summary>
         /// <param name="roleId">The ID of the role to retrieve.</param>

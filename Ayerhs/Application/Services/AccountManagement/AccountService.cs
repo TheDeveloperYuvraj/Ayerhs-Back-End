@@ -12,12 +12,13 @@ namespace Ayerhs.Application.Services.AccountManagement
     /// This class implements the IAccountService interface and provides concrete methods
     /// for account management services.
     /// </summary>
-    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IOtpHelper otpHelper, IEmailService emailService) : IAccountService
+    public class AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IOtpHelper otpHelper, IEmailService emailService, IAesEncryptionDecryptionService aesEncryptionDecryptionService) : IAccountService
     {
         private readonly ILogger<AccountService> _logger = logger;
         private readonly IAccountRepository _accountRepository = accountRepository;
         private readonly IOtpHelper _otpHelper = otpHelper;
         private readonly IEmailService _emailService = emailService;
+        private readonly IAesEncryptionDecryptionService _aesEncryptionDecryptionService = aesEncryptionDecryptionService;
 
         #region Private Methods for Support
         /// <summary>
@@ -70,6 +71,7 @@ namespace Ayerhs.Application.Services.AccountManagement
         /// <returns>A Task representing the asynchronous operation.</returns>
         public async Task RegisterClientAsync(InRegisterClientDto inRegisterClientDto)
         {
+            inRegisterClientDto.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inRegisterClientDto.ClientPassword!);
             var existingClient = await _accountRepository.GetClientByEmailAsync(inRegisterClientDto.ClientEmail!);
             if (existingClient != null)
             {
@@ -80,6 +82,12 @@ namespace Ayerhs.Application.Services.AccountManagement
             if (existingClient != null)
             {
                 throw new InvalidOperationException("Client username already exists.");
+            }
+
+            existingClient = await _accountRepository.GetClientByMobileNumberAsync(inRegisterClientDto.ClientMobileNumber!);
+            if (existingClient != null)
+            {
+                throw new InvalidOperationException("Client mobile number already exists.");
             }
 
             var salt = GetGenerateSalt();
@@ -150,6 +158,7 @@ namespace Ayerhs.Application.Services.AccountManagement
                     }
                 }
 
+                inLoginClientDto.ClientPassword = _aesEncryptionDecryptionService.Decrypt(inLoginClientDto.ClientPassword!);
                 var hashedLoginPassword = HashPassword(inLoginClientDto.ClientPassword!, client.Salt!);
                 if (hashedLoginPassword == client.ClientPassword)
                 {
