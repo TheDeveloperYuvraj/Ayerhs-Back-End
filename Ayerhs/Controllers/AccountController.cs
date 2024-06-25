@@ -2,7 +2,6 @@
 using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
 using Ayerhs.Core.Interfaces.Utility;
-using Ayerhs.Infrastructure.External;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -72,7 +71,7 @@ namespace Ayerhs.Controllers
                                 Client = client,
                                 Claims = claims
                             };
-                            return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto)); 
+                            return Ok(new ApiResponse<LoginResponseDto>(status: "Success", statusCode: 200, response: 1, successMessage: "Login Successful", txn: ConstantData.GenerateTransactionId(), returnValue: responseDto));
                         }
                         else
                         {
@@ -155,7 +154,7 @@ namespace Ayerhs.Controllers
                 var result = await _accountService.GetClientsAsync();
                 if (result != null)
                 {
-                    return Ok(new ApiResponse<List<Clients>>(status: "Success", statusCode: 200, response: 1, successMessage: "Clients fetched successfully.", txn: ConstantData.GenerateTransactionId(), returnValue: result)); 
+                    return Ok(new ApiResponse<List<Clients>>(status: "Success", statusCode: 200, response: 1, successMessage: "Clients fetched successfully.", txn: ConstantData.GenerateTransactionId(), returnValue: result));
                 }
                 else
                 {
@@ -242,7 +241,7 @@ namespace Ayerhs.Controllers
                     return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Invalid Model State", errorCode: CustomErrorCodes.ValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while generating OTP: {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
