@@ -20,10 +20,11 @@ namespace Ayerhs.Application.Services.Utility
         /// </summary>
         /// <param name="email">The recipient's email address.</param>
         /// <param name="otp">The One-Time Password to include in the email body.</param>
+        /// <param name="subject">The custom email subject.</param>
         /// <param name="body">The custom body content of the email. If not provided, a default message with the OTP code will be used.</param>
         /// <param name="isHtml">HTML email body.</param>
         /// <returns>An asynchronous task representing the email sending operation.</returns>
-        public async Task SendOtpEmailAsync(string email, string otp, string body, bool isHtml = false)
+        public async Task SendOtpEmailAsync(string email, string otp, string subject, string body, bool isHtml = false)
         {
             if (string.IsNullOrEmpty(email))
             {
@@ -38,7 +39,7 @@ namespace Ayerhs.Application.Services.Utility
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("Ayerhs", _smtpSettings.Username));
             message.To.Add(new MailboxAddress("", email));
-            message.Subject = "Your OTP Code";
+            message.Subject = subject;
 
             if (string.IsNullOrEmpty(body) || !body.Contains("{otp}"))
             {

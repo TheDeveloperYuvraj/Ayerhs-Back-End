@@ -37,5 +37,11 @@ namespace Ayerhs.Core.Entities.Utility
         /// </summary>
         [Required]
         public DateTime ValidUpto { get; set; }
+
+        /// <summary>
+        /// Interger value to check why OTP generated
+        /// </summary>
+        [Required]
+        public int Use { get; set; }
     }
 }
