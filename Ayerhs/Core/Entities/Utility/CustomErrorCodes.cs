@@ -77,6 +77,11 @@
         /// </summary>
         public const string UserManagementValidationError = "ERR-3000-001";
 
+        /// <summary>
+        /// Error code indicating error occurred while adding partition.
+        /// </summary>
+        public const string AddPartitionError = "ERR-3000-002";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

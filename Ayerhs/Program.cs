@@ -1,8 +1,11 @@
 using Ayerhs.Application.Repositories.AccountManagement;
+using Ayerhs.Application.Repositories.UserManagement;
 using Ayerhs.Application.Services.AccountManagement;
+using Ayerhs.Application.Services.UserManagement;
 using Ayerhs.Application.Services.Utility;
 using Ayerhs.Core.Entities.Utility;
 using Ayerhs.Core.Interfaces.AccountManagement;
+using Ayerhs.Core.Interfaces.UserManagement;
 using Ayerhs.Core.Interfaces.Utility;
 using Ayerhs.Infrastructure.Data;
 using Ayerhs.Infrastructure.External;
@@ -39,6 +42,8 @@ builder.Services.AddScoped<IOtpHelper, OtpHelper>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 #endregion
 
 #region Swagger

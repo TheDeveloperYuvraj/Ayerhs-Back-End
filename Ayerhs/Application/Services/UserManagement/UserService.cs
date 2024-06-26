@@ -1,0 +1,59 @@
+﻿using Ayerhs.Core.Entities.UserManagement;
+using Ayerhs.Core.Interfaces.UserManagement;
+
+namespace Ayerhs.Application.Services.UserManagement
+{
+    /// <summary>
+    /// Implements the IUserService interface for user management operations.
+    /// </summary>
+    public class UserService(ILogger<UserService> logger, IUserRepository userRepository) : IUserService
+    {
+        private readonly ILogger<UserService> _logger = logger;
+        private readonly IUserRepository _userRepository = userRepository;
+
+        /// <summary>
+        /// Generates a new GUID.
+        /// </summary>
+        /// <returns>A new GUID string.</returns>
+        private static string GenerateNewGuid()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        /// <summary>
+        /// Adds a partition to the user management system.
+        /// </summary>
+        /// <param name="partitionName">The name of the partition to add.</param>
+        /// <returns>A task that returns a tuple indicating success and an optional error message.</returns>
+        public async Task<(bool, string)> AddPartitionAsync(string partitionName)
+        {
+            var success = await _userRepository.GetPartitionDetailsByName(partitionName);
+            if (!success)
+            {
+                Partition partition = new()
+                {
+                    PartitionId = GenerateNewGuid(),
+                    PartitionName = partitionName,
+                    PartitionCreatedOn = DateTime.UtcNow,
+                    PartitionUpdatedOn = DateTime.UtcNow
+                };
+                var res = (bool)await _userRepository.AddPartitionAsync(partition);
+                if (res)
+                {
+                    _logger.LogInformation("New Partion Created Successfully with name {PartitionName}", partitionName);
+                    return (true, $"{partitionName} created successfully.");
+                }
+                else
+                {
+                    _logger.LogError("Error occurred while adding partition in database.");
+                    return (false, "Error occurred while adding partition in database.");
+                }
+            }
+            else
+            {
+                _logger.LogError("Duplicate partition name {PartitionName}", partitionName);
+                return (false, $"Partition Name {partitionName} is used. Please provide unique partition name.");
+            }
+        }
+    }
+}

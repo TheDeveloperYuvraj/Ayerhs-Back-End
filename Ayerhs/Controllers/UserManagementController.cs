@@ -1,32 +1,43 @@
-﻿using Ayerhs.Core.Entities.UserManagement;
-using Ayerhs.Core.Entities.Utility;
+﻿using Ayerhs.Core.Entities.Utility;
+using Ayerhs.Core.Interfaces.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ayerhs.Controllers
 {
+    /// <summary>
+    /// Controller for User Management operations.
+    /// </summary>
     [ApiController]
     [Route("ayerhs-security/[controller]")]
     [Authorize]
-    public class UserManagementController(ILogger<UserManagementController> logger) : ControllerBase
+    public class UserManagementController(ILogger<UserManagementController> logger, IUserService userService) : ControllerBase
     {
         private readonly ILogger<UserManagementController> _logger = logger;
+        private readonly IUserService _userService = userService;
 
-        [ProducesResponseType(typeof(int), 200)]
-        [Route("AddUser")]
+        /// <summary>
+        /// Adds a partition to the user management system.
+        /// </summary>
+        /// <param name="partitionName">The name of the partition to add.</param>
+        /// <returns>An IActionResult object indicating the outcome of the operation.</returns>
+        [ProducesResponseType(typeof(string), 200)]
+        [Route("AddPartition")]
         [HttpPost]
-        public async Task<IActionResult> AddUser(InAddUser inAddUser)
+        public async Task<IActionResult> AddPartition(string partitionName)
         {
             try
             {
-                if (ModelState.IsValid)
+                var (success, message) = await _userService.AddPartitionAsync(partitionName);
+                if (success)
                 {
-                    return Ok(inAddUser);
+                    _logger.LogInformation("{Message}", message);
+                    return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
                 }
                 else
                 {
-                    _logger.LogError("Invalid Model State");
-                    return BadRequest();
+                    _logger.LogError("Error occurred while creating partition {Message}", message);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.AddPartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
                 }
             }
             catch (Exception ex)
