@@ -114,5 +114,34 @@ namespace Ayerhs.Application.Services.UserManagement
                 return (false, $"Duplicate partition name found. {inUpdatePartition.PartitionName}");
             }
         }
+
+        /// <summary>
+        /// Deletes a partition by ID asynchronously. Logs info/errors.
+        /// </summary>
+        /// <param name="id">Partition ID.</param>
+        /// <returns>(success, error message).</returns>
+        public async Task<(bool, string)> DeletePartitionAsync(int id)
+        {
+            var existingPartition = await _userRepository.GetPartitionByIdAsync(id);
+            if (existingPartition != null)
+            {
+                var res = await _userRepository.DeletePartitionByIdAsync(id);
+                if (res)
+                {
+                    _logger.LogInformation("Partition {Partition} removed successfully.", existingPartition.PartitionName);
+                    return (true, $"Partition {existingPartition.PartitionName} removed successfully.");
+                }
+                else
+                {
+                    _logger.LogError("Error occurred while removing partition from database {Partition}", existingPartition.PartitionName);
+                    return (false, $"Error occurred while removing partition {existingPartition.PartitionName}");
+                }
+            }
+            else
+            {
+                _logger.LogError("Invalid ID {Id} Provided", id);
+                return (false, "Invalid ID provided.");
+            }
+        }
     }
 }

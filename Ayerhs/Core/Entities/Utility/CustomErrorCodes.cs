@@ -92,6 +92,16 @@
         /// </summary>
         public const string UpdatePartitionError = "ERR-3000-004";
 
+        /// <summary>
+        /// Error Code indicating error occurred while deleting partition due to negative ID provided.
+        /// </summary>
+        public const string DeletePartitionNegativeIdError = "ERR-3000-005";
+
+        /// <summary>
+        /// Error code indicating error occurred while deleting partition.
+        /// </summary>
+        public const string DeletePartitionError = "ERR-3000-006";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

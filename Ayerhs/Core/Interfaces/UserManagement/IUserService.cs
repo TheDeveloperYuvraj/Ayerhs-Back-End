@@ -26,5 +26,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="inUpdatePartition">The entity contains id and name of the partition to be updated.</param>
         /// <returns>A task that resolves to a tuple containing a boolean indicating success and a string message describing the outcome.</returns>
         Task<(bool, string)> UpdatePartitionAsync(InUpdatePartition inUpdatePartition);
+
+        /// <summary>
+        /// Deletes a partition by ID asynchronously.
+        /// </summary>
+        /// <param name="id">Partition ID.</param>
+        /// <returns>(success, error message).</returns>
+        Task<(bool, string)> DeletePartitionAsync(int id);
     }
 }

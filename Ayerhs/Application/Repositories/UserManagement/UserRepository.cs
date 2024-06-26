@@ -86,5 +86,42 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Deletes a partition by ID asynchronously.
+        /// </summary>
+        /// <param name="id">Partition ID.</param>
+        /// <returns>True on success, False otherwise.</returns>
+        public async Task<bool> DeletePartitionByIdAsync(int id)
+        {
+            try
+            {
+                var partition = await _context.Partitions.FindAsync(id);
+                if (partition != null)
+                {
+                    _context.Partitions.Remove(partition);
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Partition {Partition} removed successfully.", partition.PartitionName);
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "{Message}", ex.Message);
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Message}", ex.Message);
+                return false;
+            }
+        }
     }
 }
