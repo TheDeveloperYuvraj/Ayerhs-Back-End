@@ -66,7 +66,22 @@
         /// <summary>
         /// Error code indicating an unknown error occurred.
         /// </summary>
-        public const string UnknownError = "ERR-1000-999"; 
+        public const string UnknownError = "ERR-1000-999";
+
+        #endregion
+
+        #region Error Codes for User Management from `ERR-3000-001` to `ERR-3000-999`
+
+        /// <summary>
+        /// Error code indicating a validation error occurred while User Management
+        /// </summary>
+        public const string UserManagementValidationError = "ERR-3000-001";
+
+
+        /// <summary>
+        /// Error code for Unknow Error occurred while User Management
+        /// </summary>
+        public const string UserManagementUnknownError = "ERR-3000-999";
 
         #endregion
     }
