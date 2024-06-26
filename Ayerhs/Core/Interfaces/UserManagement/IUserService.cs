@@ -19,5 +19,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// </summary>
         /// <returns>A task that resolves to a list of Partition objects.</returns>
         Task<List<Partition>?> GetPartitionsAsync();
+
+        /// <summary>
+        /// Updates a partition asynchronously based on the provided name.
+        /// </summary>
+        /// <param name="inUpdatePartition">The entity contains id and name of the partition to be updated.</param>
+        /// <returns>A task that resolves to a tuple containing a boolean indicating success and a string message describing the outcome.</returns>
+        Task<(bool, string)> UpdatePartitionAsync(InUpdatePartition inUpdatePartition);
     }
 }

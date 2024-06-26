@@ -77,5 +77,39 @@ namespace Ayerhs.Controllers
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
         }
+
+        /// <summary>
+        /// Updates a partition asynchronously based on the provided name.
+        /// </summary>
+        /// <param name="inUpdatePartition">The entity contains id and name of the partition to be updated.</param>
+        /// <returns>
+        /// On success, a 200 OK response with a success message.
+        /// On error, a 400 BadRequest response with an error message.
+        /// </returns>
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [Route("UpdatePartition")]
+        [HttpPut]
+        public async Task<IActionResult> UpdatePartition(InUpdatePartition inUpdatePartition)
+        {
+            try
+            {
+                var (success, message) = await _userService.UpdatePartitionAsync(inUpdatePartition);
+                if (success)
+                {
+                    _logger.LogInformation("{Message}", message);
+                    return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                }
+                else
+                {
+                    _logger.LogError("An error occurred while updating partition {Message}", message);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.UpdatePartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting partitions {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
     }
 }

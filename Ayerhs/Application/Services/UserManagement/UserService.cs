@@ -73,5 +73,46 @@ namespace Ayerhs.Application.Services.UserManagement
                 return null;
             }
         }
+
+        /// <summary>
+        /// Updates a partition asynchronously and returns success/failure with message.
+        /// </summary>
+        /// <param name="inUpdatePartition">The entity contains id and name of the partition to be updated.</param>
+        /// <returns>A task resolving to (success, message) tuple.</returns>
+        public async Task<(bool, string)> UpdatePartitionAsync(InUpdatePartition inUpdatePartition)
+        {
+            var duplicatePartitionName = await _userRepository.GetPartitionDetailsByName(inUpdatePartition.PartitionName!);
+            if (!duplicatePartitionName)
+            {
+                var existingPartition = await _userRepository.GetPartitionByIdAsync(inUpdatePartition.Id);
+                if (existingPartition != null)
+                {
+                    existingPartition.PartitionName = inUpdatePartition.PartitionName;
+                    existingPartition.PartitionUpdatedOn = DateTime.UtcNow;
+
+                    var res = (bool)await _userRepository.UpdatePartitionsByNameAsync(existingPartition);
+                    if (res)
+                    {
+                        _logger.LogInformation("{PartitionName} is successfully updated.", inUpdatePartition.PartitionName);
+                        return (true, $"{inUpdatePartition.PartitionName} is successfully updated.");
+                    }
+                    else
+                    {
+                        _logger.LogError("Error occurred while updating partition. {PartitionName}", inUpdatePartition.PartitionName);
+                        return (false, $"Error occurred while updating partition. {inUpdatePartition.PartitionName}");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid partition Id provided. {PartitionName}", inUpdatePartition.Id);
+                    return (false, $"Invalid partition Id provided. {inUpdatePartition.Id}");
+                } 
+            }
+            else
+            {
+                _logger.LogError("Duplicate partition name found. {PartitionName}", inUpdatePartition.PartitionName);
+                return (false, $"Duplicate partition name found. {inUpdatePartition.PartitionName}");
+            }
+        }
     }
 }

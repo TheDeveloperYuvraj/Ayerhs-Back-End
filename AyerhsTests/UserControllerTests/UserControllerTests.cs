@@ -91,8 +91,8 @@ namespace AyerhsTests.UserControllerTests
             // Arrange
             var partitions = new List<Partition>
         {
-            new Partition { PartitionId = _faker.Random.Guid().ToString(), PartitionName = _faker.Lorem.Word(), PartitionCreatedOn = DateTime.UtcNow, PartitionUpdatedOn = DateTime.UtcNow },
-            new Partition { PartitionId = _faker.Random.Guid().ToString(), PartitionName = _faker.Lorem.Word(), PartitionCreatedOn = DateTime.UtcNow, PartitionUpdatedOn = DateTime.UtcNow }
+            new() { PartitionId = _faker.Random.Guid().ToString(), PartitionName = _faker.Lorem.Word(), PartitionCreatedOn = DateTime.UtcNow, PartitionUpdatedOn = DateTime.UtcNow },
+            new() { PartitionId = _faker.Random.Guid().ToString(), PartitionName = _faker.Lorem.Word(), PartitionCreatedOn = DateTime.UtcNow, PartitionUpdatedOn = DateTime.UtcNow }
         };
             _mockUserService.Setup(s => s.GetPartitionsAsync()).ReturnsAsync(partitions);
 

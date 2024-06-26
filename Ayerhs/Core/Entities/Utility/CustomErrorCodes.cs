@@ -87,6 +87,11 @@
         /// </summary>
         public const string GetPartitionsError = "ERR-3000-003";
 
+        /// <summary>
+        /// Error code indicating error occurred while updating partition
+        /// </summary>
+        public const string UpdatePartitionError = "ERR-3000-004";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

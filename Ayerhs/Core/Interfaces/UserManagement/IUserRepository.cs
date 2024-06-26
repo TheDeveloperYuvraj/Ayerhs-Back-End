@@ -27,5 +27,19 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// </summary>
         /// <returns>A task that resolves to a list of Partition objects.</returns>
         Task<List<Partition>> GetPartitionsAsync();
+
+        /// <summary>
+        /// Asynchronously retrieves a partition by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the partition to retrieve.</param>
+        /// <returns>A task that resolves to a Partition object if found, or null if not found.</returns>
+        Task<Partition?> GetPartitionByIdAsync(int id);
+
+        /// <summary>
+        /// Updates partitions based on a provided name.
+        /// </summary>
+        /// <param name="partition">The entity of the partition to be updated.</param>
+        /// <returns>A task that resolves to a nullable bool indicating success (true) or failure (null) upon update.</returns>
+        Task<bool?> UpdatePartitionsByNameAsync(Partition partition);
     }
 }

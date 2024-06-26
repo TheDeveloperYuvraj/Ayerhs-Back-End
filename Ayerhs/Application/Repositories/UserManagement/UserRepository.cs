@@ -53,5 +53,38 @@ namespace Ayerhs.Application.Repositories.UserManagement
         {
             return await _context.Partitions.ToListAsync();
         }
+
+        /// <summary>
+        /// Asynchronously retrieves a partition by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the partition to retrieve.</param>
+        /// <returns>A task that resolves to a Partition object if found, or null if not found.</returns>
+        public async Task<Partition?> GetPartitionByIdAsync(int id)
+        {
+            Partition? partition = await _context.Partitions.FindAsync(id);
+            return partition;
+        }
+
+        /// <summary>
+        /// Updates a partition in the database based on the provided partition object.
+        /// This method assumes the partition object has its identifier set for identification during update.
+        /// </summary>
+        /// <param name="partition">The Partition object containing the updated information.</param>
+        /// <returns>A task that resolves to a nullable bool indicating success (true) or failure (null) upon update.</returns>
+        public async Task<bool?> UpdatePartitionsByNameAsync(Partition partition)
+        {
+            _context.Partitions.Update(partition);
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Partition Updated Successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating partition {Message}", ex.Message);
+                return false;
+            }
+        }
     }
 }
