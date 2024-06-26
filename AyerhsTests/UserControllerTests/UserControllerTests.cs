@@ -144,5 +144,101 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(0, response.Response);
             Assert.Equal(exceptionMessage, response.ReturnValue);
         }
+
+        [Fact]
+        public async Task UpdatePartition_Success()
+        {
+            // Arrange
+            var inUpdatePartition = new InUpdatePartition
+            {
+                Id = _faker.Random.Int(),
+                PartitionName = _faker.Lorem.Word()
+            };
+            var successMessage = $"{inUpdatePartition.PartitionName} is successfully updated.";
+            _mockUserService.Setup(s => s.UpdatePartitionAsync(inUpdatePartition)).ReturnsAsync((true, successMessage));
+
+            // Act
+            var result = await _controller.UpdatePartition(inUpdatePartition);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal(successMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdatePartition_DuplicateName_Error()
+        {
+            // Arrange
+            var inUpdatePartition = new InUpdatePartition
+            {
+                Id = _faker.Random.Int(),
+                PartitionName = _faker.Lorem.Word()
+            };
+            var errorMessage = $"Duplicate partition name found. {inUpdatePartition.PartitionName}";
+            _mockUserService.Setup(s => s.UpdatePartitionAsync(inUpdatePartition)).ReturnsAsync((false, errorMessage));
+
+            // Act
+            var result = await _controller.UpdatePartition(inUpdatePartition);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdatePartition_InvalidId_Error()
+        {
+            // Arrange
+            var inUpdatePartition = new InUpdatePartition
+            {
+                Id = _faker.Random.Int(),
+                PartitionName = _faker.Lorem.Word()
+            };
+            var errorMessage = $"Invalid partition Id provided. {inUpdatePartition.Id}";
+            _mockUserService.Setup(s => s.UpdatePartitionAsync(inUpdatePartition)).ReturnsAsync((false, errorMessage));
+
+            // Act
+            var result = await _controller.UpdatePartition(inUpdatePartition);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdatePartition_UnknownError()
+        {
+            // Arrange
+            var inUpdatePartition = new InUpdatePartition
+            {
+                Id = _faker.Random.Int(),
+                PartitionName = _faker.Lorem.Word()
+            };
+            var exceptionMessage = "An unexpected error occurred.";
+            _mockUserService.Setup(s => s.UpdatePartitionAsync(inUpdatePartition)).ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _controller.UpdatePartition(inUpdatePartition);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(exceptionMessage, response.ReturnValue);
+        }
     }
 }
