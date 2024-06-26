@@ -240,5 +240,84 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(0, response.Response);
             Assert.Equal(exceptionMessage, response.ReturnValue);
         }
+
+        [Fact]
+        public async Task DeletePartition_Success()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var successMessage = "Partition removed successfully.";
+            _mockUserService.Setup(s => s.DeletePartitionAsync(id)).ReturnsAsync((true, successMessage));
+
+            // Act
+            var result = await _controller.DeletePartition(id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal(successMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeletePartition_InvalidId()
+        {
+            // Arrange
+            var id = -1;
+            var errorMessage = $"Invalid ID Provided {id}";
+
+            // Act
+            var result = await _controller.DeletePartition(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeletePartition_InvalidId_Error()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errorMessage = "Invalid ID provided.";
+            _mockUserService.Setup(s => s.DeletePartitionAsync(id)).ReturnsAsync((false, errorMessage));
+
+            // Act
+            var result = await _controller.DeletePartition(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeletePartition_UnknownError()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var exceptionMessage = "An unexpected error occurred.";
+            _mockUserService.Setup(s => s.DeletePartitionAsync(id)).ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _controller.DeletePartition(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(exceptionMessage, response.ReturnValue);
+        }
     }
 }
