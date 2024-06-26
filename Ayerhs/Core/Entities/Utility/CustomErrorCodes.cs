@@ -66,7 +66,47 @@
         /// <summary>
         /// Error code indicating an unknown error occurred.
         /// </summary>
-        public const string UnknownError = "ERR-1000-999"; 
+        public const string UnknownError = "ERR-1000-999";
+
+        #endregion
+
+        #region Error Codes for User Management from `ERR-3000-001` to `ERR-3000-999`
+
+        /// <summary>
+        /// Error code indicating a validation error occurred while User Management
+        /// </summary>
+        public const string UserManagementValidationError = "ERR-3000-001";
+
+        /// <summary>
+        /// Error code indicating error occurred while adding partition.
+        /// </summary>
+        public const string AddPartitionError = "ERR-3000-002";
+
+        /// <summary>
+        /// Error code indicating error occurred while getting partitions list.
+        /// </summary>
+        public const string GetPartitionsError = "ERR-3000-003";
+
+        /// <summary>
+        /// Error code indicating error occurred while updating partition
+        /// </summary>
+        public const string UpdatePartitionError = "ERR-3000-004";
+
+        /// <summary>
+        /// Error Code indicating error occurred while deleting partition due to negative ID provided.
+        /// </summary>
+        public const string DeletePartitionNegativeIdError = "ERR-3000-005";
+
+        /// <summary>
+        /// Error code indicating error occurred while deleting partition.
+        /// </summary>
+        public const string DeletePartitionError = "ERR-3000-006";
+
+
+        /// <summary>
+        /// Error code for Unknow Error occurred while User Management
+        /// </summary>
+        public const string UserManagementUnknownError = "ERR-3000-999";
 
         #endregion
     }

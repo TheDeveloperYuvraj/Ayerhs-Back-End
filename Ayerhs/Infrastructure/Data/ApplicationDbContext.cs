@@ -1,4 +1,5 @@
 ﻿using Ayerhs.Core.Entities.AccountManagement;
+using Ayerhs.Core.Entities.UserManagement;
 using Ayerhs.Core.Entities.Utility;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,11 @@ namespace Ayerhs.Infrastructure.Data
         public DbSet<OtpStorage> OtpStorages { get; set; }
 
         /// <summary>
+        /// DbSet for the Partiton entity.
+        /// </summary>
+        public DbSet<Partition> Partitions { get; set; }
+
+        /// <summary>
         /// Configures entity mappings and relationships for the database model.
         /// </summary>
         /// <param name="modelBuilder">The model builder instance for configuration.</param>
@@ -41,6 +47,7 @@ namespace Ayerhs.Infrastructure.Data
             modelBuilder.Entity<Roles>(entity => entity.ToTable("tblroles"));
             modelBuilder.Entity<ClientRoles>(entity => entity.ToTable("tblclient_roles"));
             modelBuilder.Entity<OtpStorage>(entity => entity.ToTable("tblotp_storage"));
+            modelBuilder.Entity<Partition>(entity => entity.ToTable("tblpartitions"));
 
             modelBuilder.Entity<ClientRoles>()
                 .HasKey(cr => new { cr.ClientId, cr.RoleId });

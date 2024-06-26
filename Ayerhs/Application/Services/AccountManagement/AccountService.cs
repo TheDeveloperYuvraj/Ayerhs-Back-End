@@ -404,7 +404,7 @@ namespace Ayerhs.Application.Services.AccountManagement
 
                     if (existingOtp != null)
                     {
-                        if (existingOtp.Otp == inForgotClientPassword.Otp && existingOtp.Use == 2)
+                        if (existingOtp.Otp == inForgotClientPassword.Otp)
                         {
                             var salt = client.Salt;
                             var hashedNewPassword = HashPassword(inForgotClientPassword.ClientPassword!, salt!);
