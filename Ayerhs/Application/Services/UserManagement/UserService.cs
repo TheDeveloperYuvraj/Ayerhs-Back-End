@@ -55,5 +55,23 @@ namespace Ayerhs.Application.Services.UserManagement
                 return (false, $"Partition Name {partitionName} is used. Please provide unique partition name.");
             }
         }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all Partition entities from the database.
+        /// </summary>
+        /// <returns> A task that resolves to a list of Partition objects, or null if an error occurs.</returns>
+        public async Task<List<Partition>?> GetPartitionsAsync()
+        {
+            try
+            {
+                List<Partition> partitions = await _userRepository.GetPartitionsAsync();
+                return partitions;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Message}", ex.Message);
+                return null;
+            }
+        }
     }
 }

@@ -44,5 +44,14 @@ namespace Ayerhs.Application.Repositories.UserManagement
         {
             return await _context.Partitions.AnyAsync(n => n.PartitionName == partitionName);
         }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all Partition entities from the database.
+        /// </summary>
+        /// <returns>A task that resolves to a list of Partition objects.</returns>
+        public async Task<List<Partition>> GetPartitionsAsync()
+        {
+            return await _context.Partitions.ToListAsync();
+        }
     }
 }

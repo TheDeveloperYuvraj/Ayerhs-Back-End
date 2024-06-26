@@ -82,6 +82,11 @@
         /// </summary>
         public const string AddPartitionError = "ERR-3000-002";
 
+        /// <summary>
+        /// Error code indicating error occurred while getting partitions list.
+        /// </summary>
+        public const string GetPartitionsError = "ERR-3000-003";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

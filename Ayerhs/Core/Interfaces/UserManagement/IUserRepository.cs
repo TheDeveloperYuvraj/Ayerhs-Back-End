@@ -21,5 +21,11 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <returns>A task that returns a boolean indicating success or null if no partition is found. 
         ///  The task may also return additional details about the partition upon successful retrieval.</returns>
         Task<bool> GetPartitionDetailsByName(string partitionName);
+
+        /// <summary>
+        /// Retrieves a list of partitions asynchronously.
+        /// </summary>
+        /// <returns>A task that resolves to a list of Partition objects.</returns>
+        Task<List<Partition>> GetPartitionsAsync();
     }
 }
