@@ -23,7 +23,7 @@ namespace Ayerhs.Controllers
         /// <param name="partitionName">The name of the partition to add.</param>
         /// <returns>An IActionResult object indicating the outcome of the operation.</returns>
         [ProducesResponseType(typeof(ApiResponse<string>), 200)]
-        [Route("AddPartition")]
+        [Route("AddPartition/{partitionName}")]
         [HttpPost]
         public async Task<IActionResult> AddPartition(string partitionName)
         {
