@@ -42,5 +42,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="inAddGroupDto">The entity to be added.</param>
         /// <returns>A task that returns a tuple indicating success and an optional error message.</returns>
         Task<(bool, string)> AddGroupAsync(InAddGroupDto inAddGroupDto);
+
+        /// <summary>
+        /// Asynchronously retrieves a list of groups for a specific partition.
+        /// </summary>
+        /// <param name="partitionId">The ID of the partition to retrieve groups for.</param>
+        /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
+        Task<List<Group>?> GetGroupsAsync(int partitionId);
     }
 }

@@ -193,5 +193,47 @@ namespace Ayerhs.Controllers
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
         }
+
+        /// <summary>
+        /// Retrieves a list of groups based on the provided partition ID.
+        /// </summary>
+        /// <param name="partitionId">The ID of the partition to retrieve groups for. 0 retrieves all groups.</param>
+        /// <returns>An IActionResult representing the HTTP response.</returns>
+        [ProducesResponseType(typeof(ApiResponse<List<Group>>), 200)]
+        [Route("GetGroups/{partitionId}")]
+        [HttpGet]
+        public async Task<IActionResult> GetGroups(int partitionId)
+        {
+            try
+            {
+                if (partitionId >= 0)
+                {
+                    var res = await _userService.GetGroupsAsync(partitionId);
+                    if (res != null)
+                    {
+                        string message = "Group List Fetched Successfully.";
+                        _logger.LogInformation("{Message}", message);
+                        return Ok(new ApiResponse<List<Group>>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: res));
+                    }
+                    else
+                    {
+                        string message = "An error occurred while getting groups list.";
+                        _logger.LogError("{Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.GetGroupsError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    string message = $"Invalid Partition ID provided {partitionId}";
+                    _logger.LogError("An error occurred while adding partition {Message}", message);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding partition {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
     }
 }

@@ -197,5 +197,33 @@ namespace Ayerhs.Application.Services.UserManagement
                 return (false, "Partition not present.");
             }
         }
+
+        /// <summary>
+        /// Retrieves groups asynchronously based on partition ID:
+        /// </summary>
+        /// <param name="partitionId">The partition ID (0 for all groups).</param>
+        /// <returns>A task that resolves to a list of Group objects or null (on error).</returns>
+        public async Task<List<Group>?> GetGroupsAsync(int partitionId)
+        {
+            if (partitionId >= 0)
+            {
+                _ = new List<Group>();
+                List<Group> groups;
+                if (partitionId == 0)
+                {
+                    groups = await _userRepository.GetGroupsAsync();
+                }
+                else
+                {
+                    groups = await _userRepository.GetGroupsByPartitionAsync(partitionId);
+                }
+                return groups;
+            }
+            else
+            {
+                _logger.LogError("Invalid Partition ID provided {Id}", partitionId);
+                return null;
+            }
+        }
     }
 }

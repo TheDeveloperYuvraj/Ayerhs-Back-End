@@ -105,7 +105,12 @@
         /// <summary>
         /// Error code indicating error occurred while adding group.
         /// </summary>
-        public const string AddGroupError = "ERR-3000-006";
+        public const string AddGroupError = "ERR-3000-007";
+
+        /// <summary>
+        /// Error code indicating error occurred while getting group.
+        /// </summary>
+        public const string GetGroupsError = "ERR-3000-008";
 
 
         /// <summary>

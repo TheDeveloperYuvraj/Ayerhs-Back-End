@@ -155,5 +155,24 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all groups from the data context.
+        /// </summary>
+        /// <returns>A task that resolves to a list of Group objects.</returns>
+        public async Task<List<Group>> GetGroupsAsync()
+        {
+            return await _context.Groups.ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of groups for a specific partition from the data context.
+        /// </summary>
+        /// <param name="partitionId">The ID of the partition to retrieve groups for.</param>
+        /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
+        public async Task<List<Group>> GetGroupsByPartitionAsync(int partitionId)
+        {
+            return await _context.Groups.Where(g => g.PartitionId == partitionId).ToListAsync();
+        }
     }
 }
