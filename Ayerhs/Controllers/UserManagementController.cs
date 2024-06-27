@@ -23,7 +23,7 @@ namespace Ayerhs.Controllers
         /// <param name="partitionName">The name of the partition to add.</param>
         /// <returns>An IActionResult object indicating the outcome of the operation.</returns>
         [ProducesResponseType(typeof(ApiResponse<string>), 200)]
-        [Route("AddPartition")]
+        [Route("AddPartition/{partitionName}")]
         [HttpPost]
         public async Task<IActionResult> AddPartition(string partitionName)
         {
@@ -38,7 +38,7 @@ namespace Ayerhs.Controllers
                 else
                 {
                     _logger.LogError("Error occurred while creating partition {Message}", message);
-                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.AddPartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    return Ok(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.AddPartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
                 }
             }
             catch (Exception ex)
@@ -68,7 +68,7 @@ namespace Ayerhs.Controllers
                 else
                 {
                     _logger.LogError("Partitions list is empty.");
-                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Partitions are not there.", errorCode: CustomErrorCodes.GetPartitionsError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
+                    return Ok(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: "Partitions are not there.", errorCode: CustomErrorCodes.GetPartitionsError, txn: ConstantData.GenerateTransactionId(), returnValue: null));
                 }
             }
             catch (Exception ex)
@@ -102,7 +102,7 @@ namespace Ayerhs.Controllers
                 else
                 {
                     _logger.LogError("An error occurred while updating partition {Message}", message);
-                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.UpdatePartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    return Ok(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.UpdatePartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
                 }
             }
             catch (Exception ex)
@@ -118,7 +118,7 @@ namespace Ayerhs.Controllers
         /// <param name="id">The partition ID (must be positive).</param>
         /// <returns>Success/Failure response with details.</returns>
         [ProducesResponseType(typeof(ApiResponse<string>), 200)]
-        [Route("DeletePartition")]
+        [Route("DeletePartition/{id}")]
         [HttpDelete]
         public async Task<IActionResult> DeletePartition(int id)
         {
@@ -135,7 +135,7 @@ namespace Ayerhs.Controllers
                     else
                     {
                         _logger.LogError("An error occurred while deleting partition {Message}", message);
-                        return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.DeletePartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: message, errorCode: CustomErrorCodes.DeletePartitionError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
                     }
                 }
                 else
