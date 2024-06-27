@@ -123,5 +123,37 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Asynchronously retrieve details of a group based on its name.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search for.</param>
+        /// <returns>A task that returns the partition details if found, or null if not found.</returns>
+        public async Task<bool> GetGroupDetailsByNameAndPartitionAsync(string groupName, int partitionId)
+        {
+            return await _context.Groups.AnyAsync(g => g.GroupName == groupName && g.PartitionId == partitionId);
+        }
+
+        /// <summary>
+        /// Adds a new group asynchronously to the database.
+        /// </summary>
+        /// <param name="group">The group object to be added.</param>
+        /// <returns>A task that returns true if the group is added successfully, false otherwise.</returns>
+        public async Task<bool?> AddGroupAsync(Group group)
+        {
+            await _context.Groups.AddAsync(group);
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Group added successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding group {Message}", ex.Message);
+                return false;
+            }
+        }
     }
 }

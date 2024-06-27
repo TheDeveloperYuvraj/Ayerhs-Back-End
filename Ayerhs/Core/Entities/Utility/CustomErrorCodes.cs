@@ -102,6 +102,11 @@
         /// </summary>
         public const string DeletePartitionError = "ERR-3000-006";
 
+        /// <summary>
+        /// Error code indicating error occurred while adding group.
+        /// </summary>
+        public const string AddGroupError = "ERR-3000-006";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

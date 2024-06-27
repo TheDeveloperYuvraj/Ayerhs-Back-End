@@ -33,7 +33,14 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// </summary>
         /// <param name="id">Partition ID.</param>
         /// <returns>(success, error message).</returns>
-        Task<(bool, string)> DeletePartitionAsync(int id); 
+        Task<(bool, string)> DeletePartitionAsync(int id);
         #endregion
+
+        /// <summary>
+        /// Adds group under a specific partition in user management
+        /// </summary>
+        /// <param name="inAddGroupDto">The entity to be added.</param>
+        /// <returns>A task that returns a tuple indicating success and an optional error message.</returns>
+        Task<(bool, string)> AddGroupAsync(InAddGroupDto inAddGroupDto);
     }
 }

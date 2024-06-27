@@ -36,6 +36,11 @@ namespace Ayerhs.Infrastructure.Data
         public DbSet<Partition> Partitions { get; set; }
 
         /// <summary>
+        /// DbSet for the Group entity.
+        /// </summary>
+        public DbSet<Group> Groups { get; set; }
+
+        /// <summary>
         /// Configures entity mappings and relationships for the database model.
         /// </summary>
         /// <param name="modelBuilder">The model builder instance for configuration.</param>
@@ -48,6 +53,12 @@ namespace Ayerhs.Infrastructure.Data
             modelBuilder.Entity<ClientRoles>(entity => entity.ToTable("tblclient_roles"));
             modelBuilder.Entity<OtpStorage>(entity => entity.ToTable("tblotp_storage"));
             modelBuilder.Entity<Partition>(entity => entity.ToTable("tblpartitions"));
+            modelBuilder.Entity<Group>(entity => entity.ToTable("tblgroups"));
+
+            modelBuilder.Entity<Partition>()
+                .HasMany(p => p.Groups)
+                .WithOne(g => g.Partition)
+                .HasForeignKey(g => g.PartitionId);
 
             modelBuilder.Entity<ClientRoles>()
                 .HasKey(cr => new { cr.ClientId, cr.RoleId });

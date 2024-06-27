@@ -48,5 +48,20 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="id">The unique identifier of the partition to be deleted.</param>
         /// <returns>A task that returns a nullable boolean value indicating the success of the deletion.</returns>
         Task<bool> DeletePartitionByIdAsync(int id);
+
+        /// <summary>
+        /// Asynchronously retrieve details of a group based on its name.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search for.</param>
+        /// <returns>A task that returns the partition details if found, or null if not found.</returns>
+        Task<bool> GetGroupDetailsByNameAndPartitionAsync(string groupName, int partitionId);
+
+        /// <summary>
+        /// Adds a new group asynchronously to the database.
+        /// </summary>
+        /// <param name="group">The group object to be added.</param>
+        /// <returns>A task that returns true if the group is added successfully, false otherwise.</returns>
+        Task<bool?> AddGroupAsync(Group group);
     }
 }

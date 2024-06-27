@@ -37,5 +37,11 @@ namespace Ayerhs.Core.Entities.UserManagement
         /// </summary>
         [Required]
         public DateTime? PartitionUpdatedOn { get; set; }
+
+        /// <summary>
+        /// Collection of child groups associated with this group. (One-to-Many relationship)
+        /// This property can be null if the group does not have any child groups.
+        /// </summary>
+        public ICollection<Group>? Groups { get; set; }
     }
 }

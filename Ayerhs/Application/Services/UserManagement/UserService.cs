@@ -145,7 +145,57 @@ namespace Ayerhs.Application.Services.UserManagement
                 _logger.LogError("Invalid ID {Id} Provided", id);
                 return (false, "Invalid ID provided.");
             }
-        } 
+        }
         #endregion
+
+        /// <summary>
+        /// Adds a new group to the system under a specified partition.
+        /// </summary>
+        /// <param name="inAddGroupDto">An object containing details of the group to be added.</param>
+        /// <returns>(bool, string): A tuple indicating success (bool) and a message (string) describing the outcome.</returns>
+        public async Task<(bool, string)> AddGroupAsync(InAddGroupDto inAddGroupDto)
+        {
+            var isPartitionPresent = await _userRepository.GetPartitionByIdAsync(inAddGroupDto.PartitionId);
+            if (isPartitionPresent != null)
+            {
+                var isGroupPresent = await _userRepository.GetGroupDetailsByNameAndPartitionAsync(inAddGroupDto.GroupName!, inAddGroupDto.PartitionId);
+                if (!isGroupPresent)
+                {
+                    Group group = new()
+                    {
+                        GroupId = GenerateNewGuid(),
+                        GroupName = inAddGroupDto.GroupName,
+                        PartitionId = inAddGroupDto.PartitionId,
+                        IsActive = true,
+                        IsDeleted = false,
+                        GroupCreatedOn = DateTime.UtcNow,
+                        GroupUpdatedOn = DateTime.UtcNow,
+                        GroupDeletedOn = null,
+                        Partition = isPartitionPresent,
+                    };
+                    var res = (bool)await _userRepository.AddGroupAsync(group);
+                    if (res)
+                    {
+                        _logger.LogInformation("Group {GroupName} successfully added under partition {PartitionName}", inAddGroupDto.GroupName, isPartitionPresent.PartitionName);
+                        return (true, $"Group {inAddGroupDto.GroupName} successfully added under partition {isPartitionPresent.PartitionName}");
+                    }
+                    else
+                    {
+                        _logger.LogError("Error occurred while adding group {GroupName} under partition {PartitionName}", inAddGroupDto.GroupName, isPartitionPresent.PartitionName);
+                        return (false, $"Internal error occurred while adding group {inAddGroupDto.GroupName} under partition {isPartitionPresent.PartitionName}");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Duplicate group name under same partition. GroupName : {GroupName} => PartitionName : {Partition}", inAddGroupDto.GroupName, isPartitionPresent.PartitionName);
+                    return (false, "You can not create a group with duplicate group name under same partition. Please choose group name wisely and unique.");
+                }
+            }
+            else
+            {
+                _logger.LogError("Invalid Partition ID {Id} provided.", inAddGroupDto.PartitionId);
+                return (false, "Partition not present.");
+            }
+        }
     }
 }

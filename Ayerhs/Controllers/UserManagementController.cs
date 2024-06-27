@@ -151,7 +151,47 @@ namespace Ayerhs.Controllers
                 _logger.LogError(ex, "An error occurred while getting partitions {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
-        } 
+        }
         #endregion
+
+        /// <summary>
+        /// Adds a new group to the system.
+        /// </summary>
+        /// <param name="inAddGroupDto">An object containing details of the group to be added.</param>
+        /// <returns>An IActionResult representing the HTTP response with details of the operation.</returns>
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [Route("AddGroup")]
+        [HttpPost]
+        public async Task<IActionResult> AddGroup(InAddGroupDto inAddGroupDto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var (success, message) = await _userService.AddGroupAsync(inAddGroupDto);
+                    if (success)
+                    {
+                        _logger.LogInformation("{Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("Error occurred while adding group {Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.AddGroupError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid Modal Sate");
+                    string errMsg = "Invalid Modal Sate";
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: errMsg, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: errMsg));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding partition {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
     }
 }
