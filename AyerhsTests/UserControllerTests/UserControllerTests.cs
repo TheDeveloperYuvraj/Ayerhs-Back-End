@@ -16,6 +16,8 @@ namespace AyerhsTests.UserControllerTests
         private readonly Mock<IUserService> _mockUserService;
         private readonly UserManagementController _controller;
         private readonly Faker _faker;
+        private readonly Faker<InAddGroupDto> _groupDtoFaker;
+        private readonly Faker<Group> _groupFaker;
 
         public UserControllerTests()
         {
@@ -23,8 +25,21 @@ namespace AyerhsTests.UserControllerTests
             _mockUserService = new Mock<IUserService>();
             _controller = new UserManagementController(_mockLogger.Object, _mockUserService.Object);
             _faker = new Faker();
+
+            _groupDtoFaker = new Faker<InAddGroupDto>()
+                .RuleFor(g => g.GroupName, f => f.Company.CompanyName())
+                .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100));
+
+            _groupFaker = new Faker<Group>()
+                .RuleFor(g => g.GroupName, f => f.Company.CompanyName())
+                .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100))
+                .RuleFor(g => g.IsActive, f => true)
+                .RuleFor(g => g.IsDeleted, f => false)
+                .RuleFor(g => g.GroupCreatedOn, f => DateTime.UtcNow)
+                .RuleFor(g => g.GroupUpdatedOn, f => DateTime.UtcNow);
         }
 
+        #region Unit Test Cases for Partitions
         [Fact]
         public async Task AddPartition_Success()
         {
@@ -318,6 +333,86 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(500, response.StatusCode);
             Assert.Equal(0, response.Response);
             Assert.Equal(exceptionMessage, response.ReturnValue);
+        }
+        #endregion
+
+        [Fact]
+        public async Task AddGroup_ValidModel_ReturnsSuccess()
+        {
+            var groupDto = _groupDtoFaker.Generate();
+            _mockUserService.Setup(s => s.AddGroupAsync(It.IsAny<InAddGroupDto>())).ReturnsAsync((true, "Group added successfully"));
+
+            var result = await _controller.AddGroup(groupDto);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task AddGroup_InvalidModel_ReturnsBadRequest()
+        {
+            _controller.ModelState.AddModelError("GroupName", "Required");
+            var groupDto = _groupDtoFaker.Generate();
+
+            var result = await _controller.AddGroup(groupDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task AddGroup_ServiceFailure_ReturnsError()
+        {
+            var groupDto = _groupDtoFaker.Generate();
+            _mockUserService.Setup(s => s.AddGroupAsync(It.IsAny<InAddGroupDto>())).ReturnsAsync((false, "Error adding group"));
+
+            var result = await _controller.AddGroup(groupDto);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task GetGroups_ValidPartitionId_ReturnsGroupList()
+        {
+            var partitionId = 1;
+            var groups = _groupFaker.Generate(3);
+            _mockUserService.Setup(s => s.GetGroupsAsync(partitionId)).ReturnsAsync(groups);
+
+            var result = await _controller.GetGroups(partitionId);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<List<Group>>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+            Assert.Equal(3, apiResponse.ReturnValue!.Count);
+        }
+
+        [Fact]
+        public async Task GetGroups_InvalidPartitionId_ReturnsBadRequest()
+        {
+            var partitionId = -1;
+
+            var result = await _controller.GetGroups(partitionId);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task GetGroups_ServiceFailure_ReturnsError()
+        {
+            var partitionId = 1;
+            _mockUserService.Setup(s => s.GetGroupsAsync(partitionId)).ReturnsAsync((List<Group>)null!);
+
+            var result = await _controller.GetGroups(partitionId);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
         }
     }
 }
