@@ -11,6 +11,7 @@ namespace Ayerhs.Application.Services.UserManagement
         private readonly ILogger<UserService> _logger = logger;
         private readonly IUserRepository _userRepository = userRepository;
 
+        #region Private Helper Methods
         /// <summary>
         /// Generates a new GUID.
         /// </summary>
@@ -18,8 +19,10 @@ namespace Ayerhs.Application.Services.UserManagement
         private static string GenerateNewGuid()
         {
             return Guid.NewGuid().ToString();
-        }
+        } 
+        #endregion
 
+        #region Partitions related action methods
         /// <summary>
         /// Adds a partition to the user management system.
         /// </summary>
@@ -106,7 +109,7 @@ namespace Ayerhs.Application.Services.UserManagement
                 {
                     _logger.LogError("Invalid partition Id provided. {PartitionName}", inUpdatePartition.Id);
                     return (false, $"Invalid partition Id provided. {inUpdatePartition.Id}");
-                } 
+                }
             }
             else
             {
@@ -142,6 +145,7 @@ namespace Ayerhs.Application.Services.UserManagement
                 _logger.LogError("Invalid ID {Id} Provided", id);
                 return (false, "Invalid ID provided.");
             }
-        }
+        } 
+        #endregion
     }
 }

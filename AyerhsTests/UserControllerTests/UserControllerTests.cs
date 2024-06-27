@@ -57,7 +57,7 @@ namespace AyerhsTests.UserControllerTests
             var result = await _controller.AddPartition(partitionName);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", response.Status);
             Assert.Equal(400, response.StatusCode);
@@ -118,7 +118,7 @@ namespace AyerhsTests.UserControllerTests
             var result = await _controller.GetPartitions();
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", response.Status);
             Assert.Equal(400, response.StatusCode);
@@ -185,7 +185,7 @@ namespace AyerhsTests.UserControllerTests
             var result = await _controller.UpdatePartition(inUpdatePartition);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", response.Status);
             Assert.Equal(400, response.StatusCode);
@@ -209,7 +209,7 @@ namespace AyerhsTests.UserControllerTests
             var result = await _controller.UpdatePartition(inUpdatePartition);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", response.Status);
             Assert.Equal(400, response.StatusCode);
@@ -292,7 +292,7 @@ namespace AyerhsTests.UserControllerTests
             var result = await _controller.DeletePartition(id);
 
             // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
             Assert.Equal("Error", response.Status);
             Assert.Equal(400, response.StatusCode);

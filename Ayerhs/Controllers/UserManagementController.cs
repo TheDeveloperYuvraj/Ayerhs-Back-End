@@ -17,6 +17,7 @@ namespace Ayerhs.Controllers
         private readonly ILogger<UserManagementController> _logger = logger;
         private readonly IUserService _userService = userService;
 
+        #region Partitions Management Endpoints
         /// <summary>
         /// Adds a partition to the user management system.
         /// </summary>
@@ -150,6 +151,7 @@ namespace Ayerhs.Controllers
                 _logger.LogError(ex, "An error occurred while getting partitions {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
-        }
+        } 
+        #endregion
     }
 }

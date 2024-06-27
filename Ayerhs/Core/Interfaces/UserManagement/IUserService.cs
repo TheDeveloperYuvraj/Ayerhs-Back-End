@@ -7,6 +7,7 @@ namespace Ayerhs.Core.Interfaces.UserManagement
     /// </summary>
     public interface IUserService
     {
+        #region Partitions related action methods
         /// <summary>
         /// Adds a partition to the user management system.
         /// </summary>
@@ -32,6 +33,7 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// </summary>
         /// <param name="id">Partition ID.</param>
         /// <returns>(success, error message).</returns>
-        Task<(bool, string)> DeletePartitionAsync(int id);
+        Task<(bool, string)> DeletePartitionAsync(int id); 
+        #endregion
     }
 }
