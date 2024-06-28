@@ -275,5 +275,45 @@ namespace Ayerhs.Controllers
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
         }
+
+        /// <summary>
+        /// Deletes a group asynchronously based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>An IActionResult indicating the success or failure of the deletion.</returns>
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [Route("DeleteGroup/{id}")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteGroup(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    var (success, message) = await _userService.DeleteGroupAsync(id);
+                    if (success)
+                    {
+                        _logger.LogInformation("{Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("Error occurred while deleting group {Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.DeleteGroupError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    string errMsg = $"Invalid Group ID {id} provided.";
+                    _logger.LogError("{Message}", errMsg);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: errMsg, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: errMsg));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding partition {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
     }
 }

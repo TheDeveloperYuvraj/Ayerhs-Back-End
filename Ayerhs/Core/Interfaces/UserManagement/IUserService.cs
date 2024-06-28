@@ -56,5 +56,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="inUpdateGroupDto">The DTO containing the updated group information.</param>
         /// <returns>A Task that returns a tuple containing a boolean indicating success and a message.</returns>
         Task<(bool, string)> UpdateGroupAsync(InUpdateGroupDto inUpdateGroupDto);
+
+        /// <summary>
+        /// Deletes a group asynchronously based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns a tuple containing a boolean indicating success and a message.</returns>
+        Task<(bool, string)> DeleteGroupAsync(int id);
     }
 }

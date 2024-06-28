@@ -90,5 +90,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="group">The group object containing the updated information.</param>
         /// <returns>A Task that returns true if the update was successful, otherwise false.</returns>
         Task<bool> UpdateGroupAsync(Group group);
+
+        /// <summary>
+        /// Deletes a group asynchronously based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns true if the deletion was successful, false otherwise.</returns>
+        Task<bool> DeleteGroupAsync(int id);
     }
 }

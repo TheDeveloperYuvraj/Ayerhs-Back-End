@@ -2,6 +2,7 @@
 using Ayerhs.Core.Interfaces.UserManagement;
 using Ayerhs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 
 namespace Ayerhs.Application.Repositories.UserManagement
 {
@@ -202,6 +203,45 @@ namespace Ayerhs.Application.Repositories.UserManagement
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while updating group {Message}", ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously attempts to delete a group from the database based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns true if the deletion was successful, false otherwise.</returns>
+        /// <exception cref="Exception">An error occurred while deleting the group.</exception>
+        public async Task<bool> DeleteGroupAsync(int id)
+        {
+            try
+            {
+                var group = await _context.Groups.FindAsync(id);
+                if (group != null)
+                {
+                    _context.Groups.Remove(group);
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Partition {Partition} removed successfully.", group.GroupName);
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "{Message}", ex.Message);
+                        return false;
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Group with Id {Id} not present in database.", id);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Message}", ex.Message);
                 return false;
             }
         }

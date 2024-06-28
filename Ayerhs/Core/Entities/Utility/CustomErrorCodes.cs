@@ -117,6 +117,11 @@
         /// </summary>
         public const string UpdateGroupError = "ERR-3000-009";
 
+        /// <summary>
+        /// Error code indicating error occurred while deleting group.
+        /// </summary>
+        public const string DeleteGroupError = "ERR-3000-010";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

@@ -285,5 +285,36 @@ namespace Ayerhs.Application.Services.UserManagement
                 return (false, message);
             }
         }
+
+        /// <summary>
+        /// Asynchronously attempts to delete a group based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns a tuple indicating the success of the deletion and a message.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the provided group ID is less than or equal to zero.</exception>
+        public async Task<(bool, string)> DeleteGroupAsync(int id)
+        {
+            if (id > 0)
+            {
+                var res = await _userRepository.DeleteGroupAsync(id);
+                if (res)
+                {
+                    _logger.LogInformation("Group with ID {Id} successfully removed", id);
+                    return (true, $"Group with ID {id} successfully removed");
+                }
+                else
+                {
+                    string message = $"An error occurred while deleting group with ID {id}";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+            }
+            else
+            {
+                string message = $"Invalid Group Id {id} provided.";
+                _logger.LogError("{Message}", message);
+                return (false, message);
+            }
+        }
     }
 }
