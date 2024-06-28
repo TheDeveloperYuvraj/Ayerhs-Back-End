@@ -559,5 +559,342 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(0, response.Response);
             Assert.Equal("Exception occurred", response.ReturnValue);
         }
+
+        [Fact]
+        public async Task SoftDeleteGroup_ValidId_ReturnsSuccess()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var message = $"Group with ID {id} successfully removed temporary.";
+            _mockUserService.Setup(s => s.SoftDeleteGroupAsync(id)).ReturnsAsync((true, message));
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal(message, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task SoftDeleteGroup_InvalidId_ReturnsBadRequest()
+        {
+            // Arrange
+            var id = 0;
+            var errMsg = $"Invalid Group ID {id} provided.";
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task SoftDeleteGroup_GroupDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Group with ID {id} not found.";
+            _mockUserService.Setup(s => s.SoftDeleteGroupAsync(id)).ReturnsAsync((false, errMsg));
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(notFoundResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task SoftDeleteGroup_GroupAlreadyDeleted_ReturnsConflict()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Group with ID {id} is already soft deleted.";
+            _mockUserService.Setup(s => s.SoftDeleteGroupAsync(id)).ReturnsAsync((false, errMsg));
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var conflictResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(conflictResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task SoftDeleteGroup_Unauthorized_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Unauthorized access for Group ID {id}.";
+            _mockUserService.Setup(s => s.SoftDeleteGroupAsync(id)).ThrowsAsync(new UnauthorizedAccessException(errMsg));
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(unauthorizedResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task SoftDeleteGroup_Exception_ReturnsServerError()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errorMessage = "Exception error.";
+            _mockUserService.Setup(s => s.SoftDeleteGroupAsync(id)).ThrowsAsync(new Exception(errorMessage));
+
+            // Act
+            var result = await _controller.SoftDeleteGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_ValidId_ReturnsSuccess()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var message = $"Group with ID {id} successfully recovered.";
+            _mockUserService.Setup(s => s.RecoverDeletedGroupAsync(id)).ReturnsAsync((true, message));
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal(message, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_InvalidId_ReturnsBadRequest()
+        {
+            // Arrange
+            var id = 0;
+            var errMsg = $"Invalid Group ID {id} provided.";
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_GroupDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Group with ID {id} not found.";
+            _mockUserService.Setup(s => s.RecoverDeletedGroupAsync(id)).ReturnsAsync((false, errMsg));
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(notFoundResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_GroupNotDeleted_ReturnsConflict()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Group with ID {id} is not deleted.";
+            _mockUserService.Setup(s => s.RecoverDeletedGroupAsync(id)).ReturnsAsync((false, errMsg));
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var conflictResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(conflictResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_Unauthorized_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Unauthorized access for Group ID {id}.";
+            _mockUserService.Setup(s => s.RecoverDeletedGroupAsync(id)).ThrowsAsync(new UnauthorizedAccessException(errMsg));
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(unauthorizedResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task RecoverDeletedGroup_Exception_ReturnsServerError()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errorMessage = "Exception error.";
+            _mockUserService.Setup(s => s.RecoverDeletedGroupAsync(id)).ThrowsAsync(new Exception(errorMessage));
+
+            // Act
+            var result = await _controller.RecoverDeletedGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_ValidId_ReturnsSuccess()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var message = $"Group with ID {id} successfully removed.";
+            _mockUserService.Setup(s => s.DeleteGroupAsync(id)).ReturnsAsync((true, message));
+
+            // Act
+            var result = await _controller.DeleteGroup(id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal(message, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_InvalidId_ReturnsBadRequest()
+        {
+            // Arrange
+            var id = 0;
+            var errMsg = $"Invalid Group ID {id} provided.";
+
+            // Act
+            var result = await _controller.DeleteGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_GroupDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Group with ID {id} not found.";
+            _mockUserService.Setup(s => s.DeleteGroupAsync(id)).ReturnsAsync((false, errMsg));
+
+            // Act
+            var result = await _controller.DeleteGroup(id);
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(notFoundResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_Unauthorized_ReturnsUnauthorized()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errMsg = $"Unauthorized access for Group ID {id}.";
+            _mockUserService.Setup(s => s.DeleteGroupAsync(id)).ThrowsAsync(new UnauthorizedAccessException(errMsg));
+
+            // Act
+            var result = await _controller.DeleteGroup(id);
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(unauthorizedResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errMsg, response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task DeleteGroup_Exception_ReturnsServerError()
+        {
+            // Arrange
+            var id = _faker.Random.Int(1, 1000);
+            var errorMessage = "Exception error.";
+            _mockUserService.Setup(s => s.DeleteGroupAsync(id)).ThrowsAsync(new Exception(errorMessage));
+
+            // Act
+            var result = await _controller.DeleteGroup(id);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal(errorMessage, response.ReturnValue);
+        }
     }
 }
