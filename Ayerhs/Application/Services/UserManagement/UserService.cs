@@ -287,6 +287,50 @@ namespace Ayerhs.Application.Services.UserManagement
         }
 
         /// <summary>
+        /// Soft deletes a group asynchronously.
+        /// </summary>
+        /// <param name="id">The ID of the group to soft delete.</param>
+        /// <returns>A tuple containing a boolean indicating success and a message describing the outcome.</returns>
+        public async Task<(bool, string)> SoftDeleteGroupAsync(int id)
+        {
+            if (id > 0)
+            {
+                var existingGroup = await _userRepository.GetGroupByIdAsync(id);
+
+                if (existingGroup != null)
+                {
+                    existingGroup.IsActive = false;
+                    existingGroup.IsDeleted = true;
+                    existingGroup.GroupDeletedOn = DateTime.UtcNow;
+                    var res = await _userRepository.UpdateGroupAsync(existingGroup);
+                    if (res)
+                    {
+                        _logger.LogInformation("Group with ID {Id} successfully removed temporary.", id);
+                        return (true, $"Group with ID {id} successfully removed temporary.");
+                    }
+                    else
+                    {
+                        string message = $"An error occurred while soft deleting group with ID {id}";
+                        _logger.LogError("{Message}", message);
+                        return (false, message);
+                    }
+                }
+                else
+                {
+                    string message = $"Invalid group ID {id} provided.";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+            }
+            else
+            {
+                string message = $"Invalid Group Id {id} provided.";
+                _logger.LogError("{Message}", message);
+                return (false, message);
+            }
+        }
+
+        /// <summary>
         /// Asynchronously attempts to delete a group based on the provided ID.
         /// </summary>
         /// <param name="id">The ID of the group to delete.</param>

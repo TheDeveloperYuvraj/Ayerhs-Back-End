@@ -122,6 +122,11 @@
         /// </summary>
         public const string DeleteGroupError = "ERR-3000-010";
 
+        /// <summary>
+        /// Error code indicating error occurred while soft deleting group.
+        /// </summary>
+        public const string SoftDeleteGroupError = "ERR-3000-011";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

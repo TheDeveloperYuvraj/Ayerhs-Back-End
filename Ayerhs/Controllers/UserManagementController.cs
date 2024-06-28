@@ -277,6 +277,46 @@ namespace Ayerhs.Controllers
         }
 
         /// <summary>
+        /// Soft deletes a group by marking it as inactive.
+        /// </summary>
+        /// <param name="id">The ID of the group to soft delete.</param>
+        /// <returns>An ApiResponse object indicating success or failure with details.</returns>
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [Route("SoftDeleteGroup/{id}")]
+        [HttpPatch]
+        public async Task<IActionResult> SoftDeleteGroup(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    var (success, message) = await _userService.SoftDeleteGroupAsync(id);
+                    if (success)
+                    {
+                        _logger.LogInformation("{Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                    else
+                    {
+                        _logger.LogError("Error occurred while soft deleting group {Message}", message);
+                        return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.SoftDeleteGroupError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                    }
+                }
+                else
+                {
+                    string errMsg = $"Invalid Group ID {id} provided.";
+                    _logger.LogError("{Message}", errMsg);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: errMsg, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: errMsg));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while soft deleting group {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
+
+        /// <summary>
         /// Deletes a group asynchronously based on the provided ID.
         /// </summary>
         /// <param name="id">The ID of the group to delete.</param>
@@ -311,7 +351,7 @@ namespace Ayerhs.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while adding partition {Message}", ex.Message);
+                _logger.LogError(ex, "An error occurred while deleting group {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
         }

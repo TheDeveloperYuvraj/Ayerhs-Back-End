@@ -58,6 +58,13 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         Task<(bool, string)> UpdateGroupAsync(InUpdateGroupDto inUpdateGroupDto);
 
         /// <summary>
+        /// Soft deletes a group asynchronously.
+        /// </summary>
+        /// <param name="id">The ID of the group to soft delete.</param>
+        /// <returns>A tuple containing a boolean indicating success and a message describing the outcome.</returns>
+        Task<(bool, string)> SoftDeleteGroupAsync(int id);
+
+        /// <summary>
         /// Deletes a group asynchronously based on the provided ID.
         /// </summary>
         /// <param name="id">The ID of the group to delete.</param>
