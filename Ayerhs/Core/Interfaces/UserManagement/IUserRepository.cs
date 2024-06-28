@@ -76,5 +76,9 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="partitionId">The ID of the partition to retrieve groups for.</param>
         /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
         Task<List<Group>> GetGroupsByPartitionAsync(int partitionId);
+
+        Task<Group?> GetGroupByIdAsync(int id);
+
+        Task<bool> UpdateGroupAsync(Group group);
     }
 }

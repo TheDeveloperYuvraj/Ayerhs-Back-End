@@ -112,6 +112,11 @@
         /// </summary>
         public const string GetGroupsError = "ERR-3000-008";
 
+        /// <summary>
+        /// Error code indicating error occurred while updating group.
+        /// </summary>
+        public const string UpdateGroupError = "ERR-3000-009";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

@@ -231,5 +231,54 @@ namespace Ayerhs.Application.Services.UserManagement
                 return null;
             }
         }
+
+        public async Task<(bool, string)> UpdateGroupAsync(InUpdateGroupDto inUpdateGroupDto)
+        {
+            var isPartitionPresent = await _userRepository.GetPartitionByIdAsync(inUpdateGroupDto.PartitionId);
+            if (isPartitionPresent != null)
+            {
+                var isGroupPresent = await _userRepository.GetGroupDetailsByNameAndPartitionAsync(inUpdateGroupDto.NewGroupName!, inUpdateGroupDto.PartitionId);
+                if (!isGroupPresent)
+                {
+                    var existingGroup = await _userRepository.GetGroupByIdAsync(inUpdateGroupDto.Id);
+                    if (existingGroup != null)
+                    {
+                        existingGroup.GroupName = inUpdateGroupDto.NewGroupName;
+                        existingGroup.GroupUpdatedOn = DateTime.UtcNow;
+                        var res = await _userRepository.UpdateGroupAsync(existingGroup);
+                        if (res)
+                        {
+                            string message = $"Group with name {inUpdateGroupDto.NewGroupName} successfully updated.";
+                            _logger.LogInformation("{Message}", message);
+                            return (true, message);
+                        }
+                        else
+                        {
+                            string message = $"Error occurred while updating group with name {inUpdateGroupDto.NewGroupName}";
+                            _logger.LogError("{Message}", message);
+                            return(false, message);
+                        }
+                    }
+                    else
+                    {
+                        string message = "Invalid Group Id Provided";
+                        _logger.LogError("{Message} with GroupId {Id}", message, inUpdateGroupDto.Id);
+                        return (false, message);
+                    }
+                }
+                else
+                {
+                    string message = $"Duplicate Group Name {inUpdateGroupDto.NewGroupName} Under Same Partition {isPartitionPresent.PartitionName}.";
+                    _logger.LogError("{Message}", message);
+                    return (false, $"{message}. Please Choose Unique Name.");
+                }
+            }
+            else
+            {
+                string message = "Invalid Partition Provided";
+                _logger.LogError("{Message} with ID {Id}", message, inUpdateGroupDto.PartitionId);
+                return (false, message);
+            }
+        }
     }
 }

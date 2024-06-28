@@ -174,5 +174,26 @@ namespace Ayerhs.Application.Repositories.UserManagement
         {
             return await _context.Groups.Where(g => g.PartitionId == partitionId).ToListAsync();
         }
+
+        public async Task<Group?> GetGroupByIdAsync(int id)
+        {
+            return await _context.Groups.FindAsync(id);
+        }
+
+        public async Task<bool> UpdateGroupAsync(Group group)
+        {
+            _context.Groups.Update(group);
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Group updated successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating group {Message}", ex.Message);
+                return false;
+            }
+        }
     }
 }
