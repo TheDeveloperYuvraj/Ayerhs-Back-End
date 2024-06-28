@@ -127,6 +127,11 @@
         /// </summary>
         public const string SoftDeleteGroupError = "ERR-3000-011";
 
+        /// <summary>
+        /// Error code indicating error occurred while recovering group.
+        /// </summary>
+        public const string RecoverDeletedGroupError = "ERR-3000-012";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

@@ -65,6 +65,13 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         Task<(bool, string)> SoftDeleteGroupAsync(int id);
 
         /// <summary>
+        /// Recovers a previously soft-deleted group asynchronously.
+        /// </summary>
+        /// <param name="id">The ID of the group to recover.</param>
+        /// <returns>A tuple containing a boolean indicating success and a message describing the outcome.</returns>
+        Task<(bool, string)> RecoverDeletedGroupAsync(int id);
+
+        /// <summary>
         /// Deletes a group asynchronously based on the provided ID.
         /// </summary>
         /// <param name="id">The ID of the group to delete.</param>

@@ -59,7 +59,8 @@ FOREIGN KEY ("PartitionId") REFERENCES tblpartitions("Id") ON DELETE CASCADE;
 
 SELECT * FROM public."tblpartitions";
 
-SELECT * FROM public."tblgroups";
+SELECT * FROM public."tblgroups"
+	ORDER BY "Id" ASC;
 
 
 

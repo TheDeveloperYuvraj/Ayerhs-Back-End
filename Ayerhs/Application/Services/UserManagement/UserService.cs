@@ -299,18 +299,80 @@ namespace Ayerhs.Application.Services.UserManagement
 
                 if (existingGroup != null)
                 {
-                    existingGroup.IsActive = false;
-                    existingGroup.IsDeleted = true;
-                    existingGroup.GroupDeletedOn = DateTime.UtcNow;
-                    var res = await _userRepository.UpdateGroupAsync(existingGroup);
-                    if (res)
+                    if (existingGroup.IsDeleted == false)
                     {
-                        _logger.LogInformation("Group with ID {Id} successfully removed temporary.", id);
-                        return (true, $"Group with ID {id} successfully removed temporary.");
+                        existingGroup.IsActive = false;
+                        existingGroup.IsDeleted = true;
+                        existingGroup.GroupDeletedOn = DateTime.UtcNow;
+                        var res = await _userRepository.UpdateGroupAsync(existingGroup);
+                        if (res)
+                        {
+                            _logger.LogInformation("Group with ID {Id} successfully removed temporary.", id);
+                            return (true, $"Group with ID {id} successfully removed temporary.");
+                        }
+                        else
+                        {
+                            string message = $"An error occurred while soft deleting group with ID {id}";
+                            _logger.LogError("{Message}", message);
+                            return (false, message);
+                        } 
                     }
                     else
                     {
-                        string message = $"An error occurred while soft deleting group with ID {id}";
+                        string message = $"Group with ID {id} is already in soft deleted state.";
+                        _logger.LogError("{Message}", message);
+                        return (false, message);
+                    }
+                }
+                else
+                {
+                    string message = $"Invalid group ID {id} provided.";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+            }
+            else
+            {
+                string message = $"Invalid Group Id {id} provided.";
+                _logger.LogError("{Message}", message);
+                return (false, message);
+            }
+        }
+
+        /// <summary>
+        /// Recovers a previously soft-deleted group asynchronously.
+        /// </summary>
+        /// <param name="id">The ID of the group to recover.</param>
+        /// <returns>A tuple containing a boolean indicating success and a message describing the outcome.</returns>
+        public async Task<(bool, string)> RecoverDeletedGroupAsync(int id)
+        {
+            if (id > 0)
+            {
+                var existingGroup = await _userRepository.GetGroupByIdAsync(id);
+
+                if (existingGroup != null)
+                {
+                    if (existingGroup.IsDeleted == true)
+                    {
+                        existingGroup.IsActive = true;
+                        existingGroup.IsDeleted = false;
+                        existingGroup.GroupDeletedOn = null;
+                        var res = await _userRepository.UpdateGroupAsync(existingGroup);
+                        if (res)
+                        {
+                            _logger.LogInformation("Group with ID {Id} successfully recovered.", id);
+                            return (true, $"Group with ID {id} successfully recovered.");
+                        }
+                        else
+                        {
+                            string message = $"An error occurred while recover deleted group with ID {id}";
+                            _logger.LogError("{Message}", message);
+                            return (false, message);
+                        } 
+                    }
+                    else
+                    {
+                        string message = $"Group with ID {id} is already active, no need to recover it.";
                         _logger.LogError("{Message}", message);
                         return (false, message);
                     }
