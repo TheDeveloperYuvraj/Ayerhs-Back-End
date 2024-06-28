@@ -19,7 +19,7 @@ namespace Ayerhs.Application.Services.UserManagement
         private static string GenerateNewGuid()
         {
             return Guid.NewGuid().ToString();
-        } 
+        }
         #endregion
 
         #region Partitions related action methods
@@ -261,7 +261,7 @@ namespace Ayerhs.Application.Services.UserManagement
                         {
                             string message = $"Error occurred while updating group with name {inUpdateGroupDto.NewGroupName}";
                             _logger.LogError("{Message}", message);
-                            return(false, message);
+                            return (false, message);
                         }
                     }
                     else

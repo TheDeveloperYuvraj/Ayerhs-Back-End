@@ -2,7 +2,6 @@
 using Ayerhs.Core.Interfaces.UserManagement;
 using Ayerhs.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Concurrent;
 
 namespace Ayerhs.Application.Repositories.UserManagement
 {
