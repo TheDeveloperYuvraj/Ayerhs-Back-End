@@ -236,7 +236,11 @@ namespace Ayerhs.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="inUpdateGroupDto">The DTO containing the updated group information.</param>
+        /// <returns>An IActionResult containing the API response.</returns>
         [ProducesResponseType(typeof(ApiResponse<string>), 200)]
         [Route("UpdateGroup")]
         [HttpPut]

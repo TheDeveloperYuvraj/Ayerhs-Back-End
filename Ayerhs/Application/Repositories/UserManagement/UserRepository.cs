@@ -175,11 +175,21 @@ namespace Ayerhs.Application.Repositories.UserManagement
             return await _context.Groups.Where(g => g.PartitionId == partitionId).ToListAsync();
         }
 
+        /// <summary>
+        /// Gets a group asynchronously by its identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the group to retrieve.</param>
+        /// <returns>A Task that returns the group if found, otherwise null.</returns>
         public async Task<Group?> GetGroupByIdAsync(int id)
         {
             return await _context.Groups.FindAsync(id);
         }
 
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="group">The group object containing the updated information.</param>
+        /// <returns>A Task that returns true if the update was successful, otherwise false.</returns>
         public async Task<bool> UpdateGroupAsync(Group group)
         {
             _context.Groups.Update(group);

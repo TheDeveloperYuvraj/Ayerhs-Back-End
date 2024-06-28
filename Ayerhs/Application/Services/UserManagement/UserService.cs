@@ -232,6 +232,11 @@ namespace Ayerhs.Application.Services.UserManagement
             }
         }
 
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="inUpdateGroupDto">The DTO containing the updated group information.</param>
+        /// <returns>A Task that returns a tuple containing a boolean indicating success and a message describing the outcome.</returns>
         public async Task<(bool, string)> UpdateGroupAsync(InUpdateGroupDto inUpdateGroupDto)
         {
             var isPartitionPresent = await _userRepository.GetPartitionByIdAsync(inUpdateGroupDto.PartitionId);

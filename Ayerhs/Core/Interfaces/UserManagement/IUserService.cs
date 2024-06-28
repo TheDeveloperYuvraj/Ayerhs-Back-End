@@ -50,6 +50,11 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
         Task<List<Group>?> GetGroupsAsync(int partitionId);
 
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="inUpdateGroupDto">The DTO containing the updated group information.</param>
+        /// <returns>A Task that returns a tuple containing a boolean indicating success and a message.</returns>
         Task<(bool, string)> UpdateGroupAsync(InUpdateGroupDto inUpdateGroupDto);
     }
 }
