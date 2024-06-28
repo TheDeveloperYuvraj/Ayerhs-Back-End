@@ -148,6 +148,7 @@ namespace Ayerhs.Application.Services.UserManagement
         }
         #endregion
 
+        #region Groups related action methods
         /// <summary>
         /// Adds a new group to the system under a specified partition.
         /// </summary>
@@ -315,7 +316,7 @@ namespace Ayerhs.Application.Services.UserManagement
                             string message = $"An error occurred while soft deleting group with ID {id}";
                             _logger.LogError("{Message}", message);
                             return (false, message);
-                        } 
+                        }
                     }
                     else
                     {
@@ -368,7 +369,7 @@ namespace Ayerhs.Application.Services.UserManagement
                             string message = $"An error occurred while recover deleted group with ID {id}";
                             _logger.LogError("{Message}", message);
                             return (false, message);
-                        } 
+                        }
                     }
                     else
                     {
@@ -421,6 +422,7 @@ namespace Ayerhs.Application.Services.UserManagement
                 _logger.LogError("{Message}", message);
                 return (false, message);
             }
-        }
+        } 
+        #endregion
     }
 }

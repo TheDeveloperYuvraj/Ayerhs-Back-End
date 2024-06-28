@@ -154,6 +154,7 @@ namespace Ayerhs.Controllers
         }
         #endregion
 
+        #region Groups Management Endpoints
         /// <summary>
         /// Adds a new group to the system.
         /// </summary>
@@ -394,6 +395,7 @@ namespace Ayerhs.Controllers
                 _logger.LogError(ex, "An error occurred while deleting group {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
-        }
+        } 
+        #endregion
     }
 }

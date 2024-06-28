@@ -342,6 +342,7 @@ namespace AyerhsTests.UserControllerTests
         }
         #endregion
 
+        #region Unit Test Cases for Groups
         [Fact]
         public async Task AddGroup_ValidModel_ReturnsSuccess()
         {
@@ -895,6 +896,7 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(500, response.StatusCode);
             Assert.Equal(0, response.Response);
             Assert.Equal(errorMessage, response.ReturnValue);
-        }
+        } 
+        #endregion
     }
 }
