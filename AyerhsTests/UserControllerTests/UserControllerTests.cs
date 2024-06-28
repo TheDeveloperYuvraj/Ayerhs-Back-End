@@ -18,6 +18,7 @@ namespace AyerhsTests.UserControllerTests
         private readonly Faker _faker;
         private readonly Faker<InAddGroupDto> _groupDtoFaker;
         private readonly Faker<Group> _groupFaker;
+        private readonly Faker<InUpdateGroupDto> _groupUpdateDtoFaker;
 
         public UserControllerTests()
         {
@@ -37,6 +38,11 @@ namespace AyerhsTests.UserControllerTests
                 .RuleFor(g => g.IsDeleted, f => false)
                 .RuleFor(g => g.GroupCreatedOn, f => DateTime.UtcNow)
                 .RuleFor(g => g.GroupUpdatedOn, f => DateTime.UtcNow);
+
+            _groupUpdateDtoFaker = new Faker<InUpdateGroupDto>()
+                .RuleFor(g => g.NewGroupName, f => f.Company.CompanyName())
+                .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100))
+                .RuleFor(g => g.Id, f => f.Random.Int(1, 100));
         }
 
         #region Unit Test Cases for Partitions
@@ -413,6 +419,145 @@ namespace AyerhsTests.UserControllerTests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
             Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_SuccessfulUpdate_ReturnsOk()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ReturnsAsync((true, "Group successfully updated."));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(1, response.Response);
+            Assert.Equal("Group successfully updated.", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _controller.ModelState.AddModelError("NewGroupName", "Required");
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(400, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Invalid Modal Sate", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_PartitionNotFound_ReturnsOkWithError()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ReturnsAsync((false, "Invalid Partition Provided"));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Invalid Partition Provided", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_GroupNotFound_ReturnsOkWithError()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ReturnsAsync((false, "Invalid Group Id Provided"));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Invalid Group Id Provided", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_DuplicateGroupName_ReturnsOkWithError()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ReturnsAsync((false, "Duplicate Group Name under Same Partition. Please Choose Unique Name."));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Duplicate Group Name under Same Partition. Please Choose Unique Name.", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_UpdateFailure_ReturnsOkWithError()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ReturnsAsync((false, "Error occurred while updating group."));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(200, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Error occurred while updating group.", response.ReturnValue);
+        }
+
+        [Fact]
+        public async Task UpdateGroup_ExceptionThrown_ReturnsBadRequest()
+        {
+            // Arrange
+            var groupDto = _groupUpdateDtoFaker.Generate();
+            _mockUserService.Setup(s => s.UpdateGroupAsync(It.IsAny<InUpdateGroupDto>()))
+                .ThrowsAsync(new Exception("Exception occurred"));
+
+            // Act
+            var result = await _controller.UpdateGroup(groupDto);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var response = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", response.Status);
+            Assert.Equal(500, response.StatusCode);
+            Assert.Equal(0, response.Response);
+            Assert.Equal("Exception occurred", response.ReturnValue);
         }
     }
 }
