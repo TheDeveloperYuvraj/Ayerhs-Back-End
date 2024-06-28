@@ -217,6 +217,12 @@ namespace Ayerhs.Application.Services.UserManagement
                 {
                     groups = await _userRepository.GetGroupsByPartitionAsync(partitionId);
                 }
+
+                foreach (var group in groups)
+                {
+                    group.Partition = await _userRepository.GetPartitionByIdAsync(group.PartitionId);
+                }
+
                 return groups;
             }
             else
