@@ -17,7 +17,7 @@ namespace AyerhsTests.UserControllerTests
         private readonly UserManagementController _controller;
         private readonly Faker _faker;
         private readonly Faker<InAddGroupDto> _groupDtoFaker;
-        private readonly Faker<Group> _groupFaker;
+        private readonly Faker<GroupDto> _groupListDtoFaker;
         private readonly Faker<InUpdateGroupDto> _groupUpdateDtoFaker;
 
         public UserControllerTests()
@@ -27,17 +27,17 @@ namespace AyerhsTests.UserControllerTests
             _controller = new UserManagementController(_mockLogger.Object, _mockUserService.Object);
             _faker = new Faker();
 
-            _groupDtoFaker = new Faker<InAddGroupDto>()
-                .RuleFor(g => g.GroupName, f => f.Company.CompanyName())
-                .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100));
-
-            _groupFaker = new Faker<Group>()
+            _groupListDtoFaker = new Faker<GroupDto>()
                 .RuleFor(g => g.GroupName, f => f.Company.CompanyName())
                 .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100))
                 .RuleFor(g => g.IsActive, f => true)
                 .RuleFor(g => g.IsDeleted, f => false)
                 .RuleFor(g => g.GroupCreatedOn, f => DateTime.UtcNow)
                 .RuleFor(g => g.GroupUpdatedOn, f => DateTime.UtcNow);
+
+            _groupDtoFaker = new Faker<InAddGroupDto>()
+                .RuleFor(g => g.GroupName, f => f.Company.CompanyName())
+                .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100));
 
             _groupUpdateDtoFaker = new Faker<InUpdateGroupDto>()
                 .RuleFor(g => g.NewGroupName, f => f.Company.CompanyName())
@@ -386,13 +386,13 @@ namespace AyerhsTests.UserControllerTests
         public async Task GetGroups_ValidPartitionId_ReturnsGroupList()
         {
             var partitionId = 1;
-            var groups = _groupFaker.Generate(3);
+            var groups = _groupListDtoFaker.Generate(3);
             _mockUserService.Setup(s => s.GetGroupsAsync(partitionId)).ReturnsAsync(groups);
 
             var result = await _controller.GetGroups(partitionId);
 
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var apiResponse = Assert.IsType<ApiResponse<List<Group>>>(okResult.Value);
+            var apiResponse = Assert.IsType<ApiResponse<List<GroupDto>>>(okResult.Value);
             Assert.Equal("Success", apiResponse.Status);
             Assert.Equal(3, apiResponse.ReturnValue!.Count);
         }
@@ -413,7 +413,7 @@ namespace AyerhsTests.UserControllerTests
         public async Task GetGroups_ServiceFailure_ReturnsError()
         {
             var partitionId = 1;
-            _mockUserService.Setup(s => s.GetGroupsAsync(partitionId)).ReturnsAsync((List<Group>)null!);
+            _mockUserService.Setup(s => s.GetGroupsAsync(partitionId)).ReturnsAsync((List<GroupDto>)null!);
 
             var result = await _controller.GetGroups(partitionId);
 
