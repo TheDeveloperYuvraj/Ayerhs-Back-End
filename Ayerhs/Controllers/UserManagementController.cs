@@ -200,7 +200,7 @@ namespace Ayerhs.Controllers
         /// </summary>
         /// <param name="partitionId">The ID of the partition to retrieve groups for. 0 retrieves all groups.</param>
         /// <returns>An IActionResult representing the HTTP response.</returns>
-        [ProducesResponseType(typeof(ApiResponse<List<Group>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<List<GroupDto>>), 200)]
         [Route("GetGroups/{partitionId}")]
         [HttpGet]
         public async Task<IActionResult> GetGroups(int partitionId)
@@ -214,7 +214,7 @@ namespace Ayerhs.Controllers
                     {
                         string message = "Group List Fetched Successfully.";
                         _logger.LogInformation("{Message}", message);
-                        return Ok(new ApiResponse<List<Group>>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: res));
+                        return Ok(new ApiResponse<List<GroupDto>>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: res));
                     }
                     else
                     {

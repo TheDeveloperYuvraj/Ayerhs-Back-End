@@ -204,12 +204,12 @@ namespace Ayerhs.Application.Services.UserManagement
         /// </summary>
         /// <param name="partitionId">The partition ID (0 for all groups).</param>
         /// <returns>A task that resolves to a list of Group objects or null (on error).</returns>
-        public async Task<List<Group>?> GetGroupsAsync(int partitionId)
+        public async Task<List<GroupDto>?> GetGroupsAsync(int partitionId)
         {
             if (partitionId >= 0)
             {
-                _ = new List<Group>();
                 List<Group> groups;
+
                 if (partitionId == 0)
                 {
                     groups = await _userRepository.GetGroupsAsync();
@@ -219,12 +219,34 @@ namespace Ayerhs.Application.Services.UserManagement
                     groups = await _userRepository.GetGroupsByPartitionAsync(partitionId);
                 }
 
+                var groupDtos = new List<GroupDto>();
+
                 foreach (var group in groups)
                 {
-                    group.Partition = await _userRepository.GetPartitionByIdAsync(group.PartitionId);
+                    var partition = await _userRepository.GetPartitionByIdAsync(group.PartitionId);
+                    groupDtos.Add(new GroupDto
+                    {
+                        Id = group.Id,
+                        GroupId = group.GroupId,
+                        GroupName = group.GroupName,
+                        PartitionId = group.PartitionId,
+                        IsActive = group.IsActive,
+                        IsDeleted = group.IsDeleted,
+                        GroupCreatedOn = group.GroupCreatedOn,
+                        GroupUpdatedOn = group.GroupUpdatedOn,
+                        GroupDeletedOn = group.GroupDeletedOn,
+                        Partition = new PartitionDto
+                        {
+                            Id = partition!.Id,
+                            PartitionId = partition.PartitionId!,
+                            PartitionName = partition.PartitionName!,
+                            PartitionCreatedOn = partition.PartitionCreatedOn,
+                            PartitionUpdatedOn = partition.PartitionUpdatedOn
+                        }
+                    });
                 }
 
-                return groups;
+                return groupDtos;
             }
             else
             {
