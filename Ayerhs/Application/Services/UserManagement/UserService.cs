@@ -444,7 +444,58 @@ namespace Ayerhs.Application.Services.UserManagement
                 _logger.LogError("{Message}", message);
                 return (false, message);
             }
-        } 
+        }
+
+        /// <summary>
+        /// Changes the partition of a group.
+        /// </summary>
+        /// <param name="inChangePartitionGroup">The input model containing group and partition IDs.</param>
+        /// <returns>A tuple indicating success (bool) and a descriptive message (string).</returns>
+        public async Task<(bool, string)> ChangePartitionGroupAsync(InChangePartitionGroup inChangePartitionGroup)
+        {
+            try
+            {
+                var existingGroup = await _userRepository.GetGroupByIdAsync(inChangePartitionGroup.GroupId);
+                var existingPartition = await _userRepository.GetPartitionByIdAsync(inChangePartitionGroup.PartitionId);
+                if (existingGroup != null)
+                {
+                    if (existingGroup.PartitionId != inChangePartitionGroup.PartitionId)
+                    {
+                        var res = (bool) await _userRepository.ChangePartitionOfGroupAsync(inChangePartitionGroup.GroupId, inChangePartitionGroup.PartitionId);
+                        if (res)
+                        {
+                            string message = $"Group partition changed successfully.";
+                            _logger.LogInformation("{Message}", message);
+                            return (true, message);
+                        }
+                        else
+                        {
+                            string message = $"Error occurred while Changing Partition of Group.";
+                            _logger.LogError("{Message}", message);
+                            return (false, message);
+                        }
+                    }
+                    else
+                    {
+                        string message = $"Error occurred while Changing Partition of Group. Group Already Member of {existingPartition!.PartitionName} Partition.";
+                        _logger.LogError("{Message}", message);
+                        return (false, message);
+                    }
+                }
+                else
+                {
+                    string message = $"Error occurred while Changing Partition of Group. Invalid Group ID Provided. {inChangePartitionGroup.GroupId}";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+            }
+            catch(Exception ex)
+            {
+                string message = $"Error occurred while Changing Partition of Group {ex.Message}";
+                _logger.LogError(ex, "{Message}", message);
+                return (false, message);
+            }
+        }
         #endregion
     }
 }

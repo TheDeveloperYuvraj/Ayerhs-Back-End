@@ -244,5 +244,28 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Changes the partition of a group.
+        /// </summary>
+        /// <param name="groupId">The ID of the group.</param>
+        /// <param name="partitionId">The ID of the new partition.</param>
+        /// <returns>True if the partition was changed successfully, false if group not found, null otherwise.</returns>
+        public async Task<bool?> ChangePartitionOfGroupAsync(int groupId, int partitionId)
+        {
+            var group = await GetGroupByIdAsync(groupId);
+            if (group != null)
+            {
+                group.PartitionId = partitionId;
+                _context.Groups.Update(group);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                _logger.LogError("Error occurred while Changing Partition of Group. Invalid Group ID Provided.");
+                return false;
+            }
+        }
     }
 }

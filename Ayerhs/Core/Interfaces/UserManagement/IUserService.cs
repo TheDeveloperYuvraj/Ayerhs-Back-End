@@ -77,5 +77,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="id">The ID of the group to delete.</param>
         /// <returns>A task that returns a tuple containing a boolean indicating success and a message.</returns>
         Task<(bool, string)> DeleteGroupAsync(int id);
+
+        /// <summary>
+        /// Changes the partition of a group.
+        /// </summary>
+        /// <param name="inChangePartitionGroup">The input model containing group ID and new partition ID.</param>
+        /// <returns>A tuple containing a boolean indicating success, and an error message if unsuccessful.</returns>
+        Task<(bool, string)> ChangePartitionGroupAsync(InChangePartitionGroup inChangePartitionGroup);
     }
 }

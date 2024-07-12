@@ -395,7 +395,56 @@ namespace Ayerhs.Controllers
                 _logger.LogError(ex, "An error occurred while deleting group {Message}", ex.Message);
                 return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
             }
-        } 
+        }
+
+        /// <summary>
+        /// Changes the partition group for a given partition.
+        /// </summary>
+        /// <param name="inChangePartitionGroup">The input model containing the partition ID and new group ID.</param>
+        /// <returns>An API response indicating success or failure with appropriate status code, message, and error details.</returns>
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [Route("ChangePartitionGroup")]
+        [HttpPatch]
+        public async Task<IActionResult> ChangePartitionGroup(InChangePartitionGroup inChangePartitionGroup)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (inChangePartitionGroup.GroupId > 0 && inChangePartitionGroup.PartitionId > 0)
+                    {
+                        var (success, message) = await _userService.ChangePartitionGroupAsync(inChangePartitionGroup);
+                        if (success)
+                        {
+                            _logger.LogInformation("{Message}", message);
+                            return Ok(new ApiResponse<string>(status: "Success", statusCode: 200, response: 1, successMessage: message, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                        }
+                        else
+                        {
+                            _logger.LogError("{Message}", message);
+                            return Ok(new ApiResponse<string>(status: "Error", statusCode: 200, response: 0, errorMessage: message, errorCode: CustomErrorCodes.InvalidGroupPartitionIdError, txn: ConstantData.GenerateTransactionId(), returnValue: message));
+                        }
+                    }
+                    else
+                    {
+                        string errMsg = "Invalid Group ID and Partition ID provided.";
+                        _logger.LogError("{Message}", errMsg);
+                        return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: errMsg, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: errMsg));
+                    }
+                }
+                else
+                {
+                    string errMsg = "Invalid Modal Sate";
+                    _logger.LogError("{Message}", errMsg);
+                    return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 400, response: 0, errorMessage: errMsg, errorCode: CustomErrorCodes.UserManagementValidationError, txn: ConstantData.GenerateTransactionId(), returnValue: errMsg));
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while chaging partition of group {Message}", ex.Message);
+                return BadRequest(new ApiResponse<string>(status: "Error", statusCode: 500, response: 0, errorMessage: ex.Message, errorCode: CustomErrorCodes.UserManagementUnknownError, txn: ConstantData.GenerateTransactionId(), returnValue: ex.Message));
+            }
+        }
         #endregion
     }
 }

@@ -132,6 +132,16 @@
         /// </summary>
         public const string RecoverDeletedGroupError = "ERR-3000-012";
 
+        /// <summary>
+        /// Error code indicating error occurred invalid Group and Partition ID
+        /// </summary>
+        public const string InvalidGroupPartitionIdError = "ERR-3000-013";
+
+        /// <summary>
+        /// Error code indicating error occurred while changing partition of group
+        /// </summary>
+        public const string ChangePartitionGroupError = "ERR-3000-014";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management
