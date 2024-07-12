@@ -105,5 +105,13 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="partitionId">The ID of the new partition.</param>
         /// <returns>True if the partition was changed successfully, null otherwise.</returns>
         Task<bool?> ChangePartitionOfGroupAsync(int groupId, int partitionId);
+
+        /// <summary>
+        /// Asynchronously checks if a group with the specified name exists in the given partition.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search in.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a nullable boolean indicating whether the group exists.</returns>
+        Task<bool?> GetGroupByNameAndPartitionAsync(string groupName, int partitionId);
     }
 }

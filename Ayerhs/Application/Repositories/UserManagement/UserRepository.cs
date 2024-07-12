@@ -267,5 +267,17 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Determines if a group with the specified name exists in the given partition.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search in.</param>
+        /// <returns>True if a group with the specified name and partition ID exists, otherwise False or null if no group is found.</returns>
+        public async Task<bool?> GetGroupByNameAndPartitionAsync(string groupName, int partitionId)
+        {
+            return await _context.Groups
+                         .AnyAsync(g => g.GroupName == groupName && g.PartitionId == partitionId);
+        }
     }
 }

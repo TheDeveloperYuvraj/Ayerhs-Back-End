@@ -457,41 +457,46 @@ namespace Ayerhs.Application.Services.UserManagement
             {
                 var existingGroup = await _userRepository.GetGroupByIdAsync(inChangePartitionGroup.GroupId);
                 var existingPartition = await _userRepository.GetPartitionByIdAsync(inChangePartitionGroup.PartitionId);
-                if (existingGroup != null)
+
+                if (existingGroup == null)
                 {
-                    if (existingGroup.PartitionId != inChangePartitionGroup.PartitionId)
-                    {
-                        var res = (bool) await _userRepository.ChangePartitionOfGroupAsync(inChangePartitionGroup.GroupId, inChangePartitionGroup.PartitionId);
-                        if (res)
-                        {
-                            string message = $"Group partition changed successfully.";
-                            _logger.LogInformation("{Message}", message);
-                            return (true, message);
-                        }
-                        else
-                        {
-                            string message = $"Error occurred while Changing Partition of Group.";
-                            _logger.LogError("{Message}", message);
-                            return (false, message);
-                        }
-                    }
-                    else
-                    {
-                        string message = $"Error occurred while Changing Partition of Group. Group Already Member of {existingPartition!.PartitionName} Partition.";
-                        _logger.LogError("{Message}", message);
-                        return (false, message);
-                    }
+                    string message = $"Error occurred while changing the partition of the group. Invalid Group ID provided: {inChangePartitionGroup.GroupId}";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+
+                if (existingGroup.PartitionId == inChangePartitionGroup.PartitionId)
+                {
+                    string message = $"Error occurred while changing the partition of the group. The group is already a member of the {existingPartition!.PartitionName} partition.";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+
+                var groupWithSameNameInNewPartition = (bool) await _userRepository.GetGroupByNameAndPartitionAsync(existingGroup.GroupName!, inChangePartitionGroup.PartitionId);
+                if (groupWithSameNameInNewPartition)
+                {
+                    string message = $"Error occurred while changing the partition of the group. The partition {existingPartition!.PartitionName} already has a group with the name {existingGroup.GroupName}.";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+
+                var res = (bool) await _userRepository.ChangePartitionOfGroupAsync(inChangePartitionGroup.GroupId, inChangePartitionGroup.PartitionId);
+                if (res)
+                {
+                    string message = $"Group partition changed successfully.";
+                    _logger.LogInformation("{Message}", message);
+                    return (true, message);
                 }
                 else
                 {
-                    string message = $"Error occurred while Changing Partition of Group. Invalid Group ID Provided. {inChangePartitionGroup.GroupId}";
+                    string message = $"Error occurred while changing the partition of the group.";
                     _logger.LogError("{Message}", message);
                     return (false, message);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                string message = $"Error occurred while Changing Partition of Group {ex.Message}";
+                string message = $"Error occurred while changing the partition of the group: {ex.Message}";
                 _logger.LogError(ex, "{Message}", message);
                 return (false, message);
             }
