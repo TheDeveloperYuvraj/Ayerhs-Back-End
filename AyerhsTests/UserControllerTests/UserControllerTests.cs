@@ -19,6 +19,7 @@ namespace AyerhsTests.UserControllerTests
         private readonly Faker<InAddGroupDto> _groupDtoFaker;
         private readonly Faker<GroupDto> _groupListDtoFaker;
         private readonly Faker<InUpdateGroupDto> _groupUpdateDtoFaker;
+        private readonly Faker<InChangePartitionGroup> _changePartitionGroupFaker;
 
         public UserControllerTests()
         {
@@ -43,6 +44,10 @@ namespace AyerhsTests.UserControllerTests
                 .RuleFor(g => g.NewGroupName, f => f.Company.CompanyName())
                 .RuleFor(g => g.PartitionId, f => f.Random.Int(1, 100))
                 .RuleFor(g => g.Id, f => f.Random.Int(1, 100));
+
+            _changePartitionGroupFaker = new Faker<InChangePartitionGroup>()
+                .RuleFor(c => c.GroupId, f => f.Random.Int(1, 100))
+                .RuleFor(c => c.PartitionId, f => f.Random.Int(1, 100));
         }
 
         #region Unit Test Cases for Partitions
@@ -896,7 +901,89 @@ namespace AyerhsTests.UserControllerTests
             Assert.Equal(500, response.StatusCode);
             Assert.Equal(0, response.Response);
             Assert.Equal(errorMessage, response.ReturnValue);
-        } 
+        }
+
+        [Fact]
+        public async Task ChangePartitionGroup_ValidModel_ReturnsSuccess()
+        {
+            // Arrange
+            var inChangePartitionGroup = _changePartitionGroupFaker.Generate();
+            _mockUserService.Setup(s => s.ChangePartitionGroupAsync(It.IsAny<InChangePartitionGroup>())).ReturnsAsync((true, "Partition changed successfully"));
+
+            // Act
+            var result = await _controller.ChangePartitionGroup(inChangePartitionGroup);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Success", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task ChangePartitionGroup_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            _controller.ModelState.AddModelError("GroupId", "Required");
+            var inChangePartitionGroup = _changePartitionGroupFaker.Generate();
+
+            // Act
+            var result = await _controller.ChangePartitionGroup(inChangePartitionGroup);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task ChangePartitionGroup_InvalidGroupIdOrPartitionId_ReturnsBadRequest()
+        {
+            // Arrange
+            var inChangePartitionGroup = new InChangePartitionGroup { GroupId = 0, PartitionId = 0 };
+
+            // Act
+            var result = await _controller.ChangePartitionGroup(inChangePartitionGroup);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal("Invalid Group ID and Partition ID provided.", apiResponse.ReturnValue);
+        }
+
+        [Fact]
+        public async Task ChangePartitionGroup_ServiceFailure_ReturnsError()
+        {
+            // Arrange
+            var inChangePartitionGroup = _changePartitionGroupFaker.Generate();
+            _mockUserService.Setup(s => s.ChangePartitionGroupAsync(It.IsAny<InChangePartitionGroup>())).ReturnsAsync((false, "Error changing partition"));
+
+            // Act
+            var result = await _controller.ChangePartitionGroup(inChangePartitionGroup);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(okResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+        }
+
+        [Fact]
+        public async Task ChangePartitionGroup_Exception_ReturnsServerError()
+        {
+            // Arrange
+            var inChangePartitionGroup = _changePartitionGroupFaker.Generate();
+            var exceptionMessage = "An unexpected error occurred.";
+            _mockUserService.Setup(s => s.ChangePartitionGroupAsync(It.IsAny<InChangePartitionGroup>())).ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _controller.ChangePartitionGroup(inChangePartitionGroup);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var apiResponse = Assert.IsType<ApiResponse<string>>(badRequestResult.Value);
+            Assert.Equal("Error", apiResponse.Status);
+            Assert.Equal(exceptionMessage, apiResponse.ReturnValue);
+        }
         #endregion
     }
 }
