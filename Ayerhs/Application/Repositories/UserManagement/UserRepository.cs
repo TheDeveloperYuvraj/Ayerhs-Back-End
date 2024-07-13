@@ -257,6 +257,7 @@ namespace Ayerhs.Application.Repositories.UserManagement
             if (group != null)
             {
                 group.PartitionId = partitionId;
+                group.GroupUpdatedOn = DateTime.UtcNow;
                 _context.Groups.Update(group);
                 await _context.SaveChangesAsync();
                 return true;

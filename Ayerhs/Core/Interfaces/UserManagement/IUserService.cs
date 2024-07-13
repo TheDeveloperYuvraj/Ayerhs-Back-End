@@ -84,5 +84,12 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="inChangePartitionGroup">The input model containing group ID and new partition ID.</param>
         /// <returns>A tuple containing a boolean indicating success, and an error message if unsuccessful.</returns>
         Task<(bool, string)> ChangePartitionGroupAsync(InChangePartitionGroup inChangePartitionGroup);
+
+        /// <summary>
+        /// Enables or disables a group based on the provided group ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to enable or disable.</param>
+        /// <returns>A tuple indicating success or failure and a message.</returns>
+        Task<(bool, string)> EnableDisableGroupAsync(int id);
     }
 }

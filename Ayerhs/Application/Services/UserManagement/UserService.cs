@@ -501,6 +501,55 @@ namespace Ayerhs.Application.Services.UserManagement
                 return (false, message);
             }
         }
+
+        /// <summary>
+        /// Enables or disables a group based on the provided group ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to enable or disable.</param>
+        /// <returns>A tuple indicating success or failure and a message.</returns>
+        public async Task<(bool, string)> EnableDisableGroupAsync(int id)
+        {
+            try
+            {
+                var existingGroup = await _userRepository.GetGroupByIdAsync(id);
+                if (existingGroup != null)
+                {
+                    string message = string.Empty;
+                    if (existingGroup.IsActive == true)
+                    {
+                        existingGroup.IsActive = false;
+                        message = $"{existingGroup.GroupName} is disabled successfully.";
+                    }
+                    else
+                    {
+                        existingGroup.IsActive = true;
+                        message = $"{existingGroup.GroupName} is enabled successfully.";
+                    }
+                    existingGroup.GroupUpdatedOn = DateTime.Now;
+                    var res = await _userRepository.UpdateGroupAsync(existingGroup);
+                    if (res)
+                    {
+                        return (true, message);
+                    }
+                    else
+                    {
+                        return (false, $"Error occurred while processing your request on {existingGroup.GroupName}");
+                    }
+                }
+                else
+                {
+                    string message = $"Invalid Group ID Provided {id}";
+                    _logger.LogError("{Message}", message);
+                    return (false, message);
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = $"An error occurred while processiong your request {ex.Message}";
+                _logger.LogError(ex, "{Message}", ex.Message);
+                return (false, message);
+            }
+        }
         #endregion
     }
 }
