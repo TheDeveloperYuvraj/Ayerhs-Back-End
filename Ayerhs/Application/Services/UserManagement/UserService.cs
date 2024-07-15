@@ -525,7 +525,7 @@ namespace Ayerhs.Application.Services.UserManagement
                         existingGroup.IsActive = true;
                         message = $"{existingGroup.GroupName} is enabled successfully.";
                     }
-                    existingGroup.GroupUpdatedOn = DateTime.Now;
+                    existingGroup.GroupUpdatedOn = DateTime.UtcNow;
                     var res = await _userRepository.UpdateGroupAsync(existingGroup);
                     if (res)
                     {
