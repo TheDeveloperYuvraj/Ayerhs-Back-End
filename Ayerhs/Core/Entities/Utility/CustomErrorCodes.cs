@@ -102,6 +102,51 @@
         /// </summary>
         public const string DeletePartitionError = "ERR-3000-006";
 
+        /// <summary>
+        /// Error code indicating error occurred while adding group.
+        /// </summary>
+        public const string AddGroupError = "ERR-3000-007";
+
+        /// <summary>
+        /// Error code indicating error occurred while getting group.
+        /// </summary>
+        public const string GetGroupsError = "ERR-3000-008";
+
+        /// <summary>
+        /// Error code indicating error occurred while updating group.
+        /// </summary>
+        public const string UpdateGroupError = "ERR-3000-009";
+
+        /// <summary>
+        /// Error code indicating error occurred while deleting group.
+        /// </summary>
+        public const string DeleteGroupError = "ERR-3000-010";
+
+        /// <summary>
+        /// Error code indicating error occurred while soft deleting group.
+        /// </summary>
+        public const string SoftDeleteGroupError = "ERR-3000-011";
+
+        /// <summary>
+        /// Error code indicating error occurred while recovering group.
+        /// </summary>
+        public const string RecoverDeletedGroupError = "ERR-3000-012";
+
+        /// <summary>
+        /// Error code indicating error occurred invalid Group and Partition ID
+        /// </summary>
+        public const string InvalidGroupPartitionIdError = "ERR-3000-013";
+
+        /// <summary>
+        /// Error code indicating error occurred while changing partition of group
+        /// </summary>
+        public const string ChangePartitionGroupError = "ERR-3000-014";
+
+        /// <summary>
+        /// Error code indicating error occurred while enableing or disableing group.
+        /// </summary>
+        public const string EnableDisableGroupError = "ERR-3000-015";
+
 
         /// <summary>
         /// Error code for Unknow Error occurred while User Management

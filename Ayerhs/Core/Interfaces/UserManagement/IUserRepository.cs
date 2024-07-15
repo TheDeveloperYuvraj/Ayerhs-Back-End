@@ -48,5 +48,70 @@ namespace Ayerhs.Core.Interfaces.UserManagement
         /// <param name="id">The unique identifier of the partition to be deleted.</param>
         /// <returns>A task that returns a nullable boolean value indicating the success of the deletion.</returns>
         Task<bool> DeletePartitionByIdAsync(int id);
+
+        /// <summary>
+        /// Asynchronously retrieve details of a group based on its name.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search for.</param>
+        /// <returns>A task that returns the partition details if found, or null if not found.</returns>
+        Task<bool> GetGroupDetailsByNameAndPartitionAsync(string groupName, int partitionId);
+
+        /// <summary>
+        /// Adds a new group asynchronously to the database.
+        /// </summary>
+        /// <param name="group">The group object to be added.</param>
+        /// <returns>A task that returns true if the group is added successfully, false otherwise.</returns>
+        Task<bool?> AddGroupAsync(Group group);
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all groups.
+        /// </summary>
+        /// <returns>A task that resolves to a list of Group objects.</returns>
+        Task<List<Group>> GetGroupsAsync();
+
+        /// <summary>
+        /// Asynchronously retrieves a list of groups for a specific partition.
+        /// </summary>
+        /// <param name="partitionId">The ID of the partition to retrieve groups for.</param>
+        /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
+        Task<List<Group>> GetGroupsByPartitionAsync(int partitionId);
+
+        /// <summary>
+        /// Gets a group asynchronously by its identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the group to retrieve.</param>
+        /// <returns>A Task that returns the group if found, otherwise null.</returns>
+        Task<Group?> GetGroupByIdAsync(int id);
+
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="group">The group object containing the updated information.</param>
+        /// <returns>A Task that returns true if the update was successful, otherwise false.</returns>
+        Task<bool> UpdateGroupAsync(Group group);
+
+        /// <summary>
+        /// Deletes a group asynchronously based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns true if the deletion was successful, false otherwise.</returns>
+        Task<bool> DeleteGroupAsync(int id);
+
+        /// <summary>
+        /// Changes the partition of a group.
+        /// </summary>
+        /// <param name="groupId">The ID of the group.</param>
+        /// <param name="partitionId">The ID of the new partition.</param>
+        /// <returns>True if the partition was changed successfully, null otherwise.</returns>
+        Task<bool?> ChangePartitionOfGroupAsync(int groupId, int partitionId);
+
+        /// <summary>
+        /// Asynchronously checks if a group with the specified name exists in the given partition.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search in.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a nullable boolean indicating whether the group exists.</returns>
+        Task<bool?> GetGroupByNameAndPartitionAsync(string groupName, int partitionId);
     }
 }

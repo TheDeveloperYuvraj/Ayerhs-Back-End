@@ -123,5 +123,162 @@ namespace Ayerhs.Application.Repositories.UserManagement
                 return false;
             }
         }
+
+        /// <summary>
+        /// Asynchronously retrieve details of a group based on its name.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search for.</param>
+        /// <returns>A task that returns the partition details if found, or null if not found.</returns>
+        public async Task<bool> GetGroupDetailsByNameAndPartitionAsync(string groupName, int partitionId)
+        {
+            return await _context.Groups.AnyAsync(g => g.GroupName == groupName && g.PartitionId == partitionId);
+        }
+
+        /// <summary>
+        /// Adds a new group asynchronously to the database.
+        /// </summary>
+        /// <param name="group">The group object to be added.</param>
+        /// <returns>A task that returns true if the group is added successfully, false otherwise.</returns>
+        public async Task<bool?> AddGroupAsync(Group group)
+        {
+            await _context.Groups.AddAsync(group);
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Group added successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding group {Message}", ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of all groups from the data context.
+        /// </summary>
+        /// <returns>A task that resolves to a list of Group objects.</returns>
+        public async Task<List<Group>> GetGroupsAsync()
+        {
+            return await _context.Groups.ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of groups for a specific partition from the data context.
+        /// </summary>
+        /// <param name="partitionId">The ID of the partition to retrieve groups for.</param>
+        /// <returns>A task that resolves to a list of Group objects for the specified partition.</returns>
+        public async Task<List<Group>> GetGroupsByPartitionAsync(int partitionId)
+        {
+            return await _context.Groups.Where(g => g.PartitionId == partitionId).ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets a group asynchronously by its identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the group to retrieve.</param>
+        /// <returns>A Task that returns the group if found, otherwise null.</returns>
+        public async Task<Group?> GetGroupByIdAsync(int id)
+        {
+            return await _context.Groups.FindAsync(id);
+        }
+
+        /// <summary>
+        /// Updates a group asynchronously.
+        /// </summary>
+        /// <param name="group">The group object containing the updated information.</param>
+        /// <returns>A Task that returns true if the update was successful, otherwise false.</returns>
+        public async Task<bool> UpdateGroupAsync(Group group)
+        {
+            _context.Groups.Update(group);
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Group updated successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating group {Message}", ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously attempts to delete a group from the database based on the provided ID.
+        /// </summary>
+        /// <param name="id">The ID of the group to delete.</param>
+        /// <returns>A task that returns true if the deletion was successful, false otherwise.</returns>
+        /// <exception cref="Exception">An error occurred while deleting the group.</exception>
+        public async Task<bool> DeleteGroupAsync(int id)
+        {
+            try
+            {
+                var group = await _context.Groups.FindAsync(id);
+                if (group != null)
+                {
+                    _context.Groups.Remove(group);
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Partition {Partition} removed successfully.", group.GroupName);
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "{Message}", ex.Message);
+                        return false;
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Group with Id {Id} not present in database.", id);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Message}", ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Changes the partition of a group.
+        /// </summary>
+        /// <param name="groupId">The ID of the group.</param>
+        /// <param name="partitionId">The ID of the new partition.</param>
+        /// <returns>True if the partition was changed successfully, false if group not found, null otherwise.</returns>
+        public async Task<bool?> ChangePartitionOfGroupAsync(int groupId, int partitionId)
+        {
+            var group = await GetGroupByIdAsync(groupId);
+            if (group != null)
+            {
+                group.PartitionId = partitionId;
+                group.GroupUpdatedOn = DateTime.UtcNow;
+                _context.Groups.Update(group);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                _logger.LogError("Error occurred while Changing Partition of Group. Invalid Group ID Provided.");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if a group with the specified name exists in the given partition.
+        /// </summary>
+        /// <param name="groupName">The name of the group to search for.</param>
+        /// <param name="partitionId">The ID of the partition to search in.</param>
+        /// <returns>True if a group with the specified name and partition ID exists, otherwise False or null if no group is found.</returns>
+        public async Task<bool?> GetGroupByNameAndPartitionAsync(string groupName, int partitionId)
+        {
+            return await _context.Groups
+                         .AnyAsync(g => g.GroupName == groupName && g.PartitionId == partitionId);
+        }
     }
 }
